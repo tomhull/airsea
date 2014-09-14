@@ -1,8 +1,16 @@
 Package: airsea
-Title: What the package does (short line)
+Title: Tools for air/sea gas exchange
 Version: 0.1
-Authors@R: "First Last <first.last@example.com> [aut, cre]"
-Description: What the package does (paragraph)
-Depends: R (>= 3.1.0)
-License: What license is it under?
+Authors@R: c( person('Tom', 'Hull', email = 'tom.hull@cefas.co.uk', role =
+    c('aut', 'cre')), person('Martin', 'Johnson', email =
+    'martin.johnson.uea.ac.uk', role = 'aut'))
+Description: Provides tools for calculating and exploring air-sea gas
+    interactions. Includes calculation of net community production (NCP) via
+    continuous measurement of O_2_.
+Depends:
+    R (>= 3.1.0)
+License: GPL-2
 LazyData: true
+Imports:
+    deSolve,
+    lhs
