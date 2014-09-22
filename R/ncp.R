@@ -52,3 +52,25 @@ ncpModel <- function(t, y, parms){
         list(c(dC))
     })
 }
+
+#' Rate of change in mixed layer
+#'
+#' Calculates rate of change in mixed layer depth for NCP estimation
+#' returns positive value for MLD deepening i.e. Entrainment, otherwise returns 0
+#' called by run_ncp functions
+#' @param h0 the mixed layer depth at time 0
+#' @param h1 the mixed layer depth at time 1
+#' @param time a vector containing the maximum time interval
+#' @return the rate of change in mixed layer depth, or 0 if h1 < h0
+#' @keywords mixed layer depth entrainment
+calc_dhdt <- function(h0, h1, time, entrainmentOff){
+    # calculate rate of change in mixed layer depth over time
+    # returns 0 for negative change
+    dhdt = (h1-h0)/max(time)
+    if((dhdt < 0) | entrainmentOff == T){
+        return(0)
+    }
+    else{
+        return(dhdt)
+    }
+}
