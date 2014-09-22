@@ -6,6 +6,8 @@
 Bwoolf(compound = "O2", u)
 }
 \arguments{
+\item{compound}{character string of compound of interest ('O2' ,'N2', 'Ar', 'CO2')}
+
 \item{u}{vector of wind speed in meters per second at 10 meters height}
 }
 \value{
@@ -13,6 +15,10 @@ vector of equilibrium bubble supersaturation effects (no units)
 }
 \description{
 Implements the bubble supersaturation parametrisation of Woolf and Thorpe, 1991
+Note: parametrisation is only applicable for Oxygen (O2), Nitrogen (N2), Argon (Ar) and Carbon Dioxide (CO2).
+}
+\details{
+TODO
 }
 \examples{
 Bwoolf('Ar', 7)  # bubble supersaturation effect for Argon at 7 m/s winds
