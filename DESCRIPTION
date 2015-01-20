@@ -10,7 +10,3 @@ Description: Provides tools for calculating and exploring air-sea gas
 Depends:
     R (>= 3.1.0)
 License: GPL-2
-LazyData: true
-Imports:
-    deSolve,
-    lhs

@@ -1,8 +1,10 @@
+# gas transfer related functions, many depend on schmidt.
+
 #' Wanninkhov et al (2009) Gas transfer velocity
 #'
 #' Implements the gas transfer velocity parametrisation of Wanninkhov et al (2009).
 #'
-#' @details TODO
+#' @details TODO - K_calcs scheme
 #' @param compound character string of compound of interest
 #' @param T vector of temperature in degrees Centigrade
 #' @param u vector of wind speed in meters per second at 10 meters height
@@ -11,7 +13,7 @@
 #' @keywords kw gas exchange
 #' @references Wanninkhof, R., Asher, W. E., Ho, D. T., Sweeney, C., & McGillis, W. R. (2009).  'Advances in Quantifying Air-Sea Gas Exchange and Environmental Forcing*. Annual Review of Marine Science, 1(1), 213–244. doi:10.1146/annurev.marine.010908.163742
 #' @examples
-#' Wann09Kw('O2', 10, 7, 35)  # gas transfer velocity for oxygen
+#' Wann09Kw('O2', 10, 7, 35)  # gas transfer velocity for oxygen at 10oC, 7 m-1 s-1 winds and 35 salinity.
 Wann09Kw <- function(compound, T, u, S, normalize=0, schmidt_formulation=0){
     # Kw parametrisation of Wanninkhof2009
     # output in meters per second
@@ -32,7 +34,7 @@ Wann09Kw <- function(compound, T, u, S, normalize=0, schmidt_formulation=0){
 #' @keywords kw gas exchange bubble
 #' @references Woolf, D. K., & Thorpe, S. A. (1991). Bubbles and the air-sea exchange of gases in near-saturation conditions. Journal of Marine Research, 49(3), 435–466. doi:10.1357/002224091784995765
 #' @examples
-#' WoolfB('Ar', 7)  # bubble supersaturation effect for Argon at 7 m/s winds
+#' WoolfB('Ar', 7)  # bubble supersaturation effect for Argon at 7 m-1 s-1 winds
 WoolfB <- function(compound = 'O2', u){
     # bubble saturation effects from Woolf1991
     # 9m/s/ = 1% supersat
@@ -55,7 +57,7 @@ WoolfB <- function(compound = 'O2', u){
 #' @references Smith, S. D. (1980). Wind stress and heat flux over the ocean in gale force winds. J Phys. Oceanogr. 10, 709-726.
 #' @keywords drag coefficent
 SmithCD <- function(u){
-    1e-4*(6.1+0.63*u)
+    1e-4*(6.1+0.63 * u)
 }
 
 #' Saturated Large and Pond (1981) Drag Coefficent
@@ -66,6 +68,7 @@ SmithCD <- function(u){
 #' @return vector of drag coefficent
 #' @references Sullivan, P. P., Romero, L., McWilliams, J. C., & Melville, W. K. (2012). Transient Evolution of Langmuir Turbulence in Ocean Boundary Layers Driven by Hurricane Winds and Waves. Journal of Physical Oceanography, 42(11), 1959–1980. doi:10.1175/JPO-D-12-025.1
 #' @keywords drag coefficent
+#' @export
 LargePondCD <- function(u){
     # returns drag coefficent as per Large & Pond, 1981
     # with high wind saturation as per Sullivan et al, 2012

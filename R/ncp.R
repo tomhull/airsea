@@ -1,7 +1,7 @@
-#' Oxygen concentration saturation
+#' Equilibrium Oxygen saturation concentration
 #'
 #' Calculates oxygen saturation concentration in equilibrium with the atmosphere
-#' as per Garcia & Gordon, 1992 (Benson & Kraus, rather than combined)
+#' as per Garcia & Gordon, 1992 (Benson & Kraus data)
 #' @param temp numeric vector of water temperature in degrees Celsius
 #' @param salinity numeric vector of salinity (PSU)
 #' @return vector of saturation concentration in micro mol per litre
@@ -30,47 +30,4 @@ Csat <- function(temp, salinity){
     (C0*salinity^2)
 
     return((exp(O2.sat))* 44.6608)     # output in uMol/L
-}
-
-#' NCP model
-#'
-#' Solves for predicted oxygen for use in NCP estimation
-#' Called by run_ncp functions.
-#' @param t a integer vector timing sequence
-#' @param y the initial oxygen concentration i.e. O2 at t0
-#' @param parms a list of parameter values
-#' @return vector of predicted oxygen concentrations at solver timesteps
-#' @keywords oxygen NCP
-ncpModel <- function(t, y, parms){
-    with(as.list(c(y, parms)),{
-         Csat <- Csat(temperature(t), salinity(t))
-         o = C / Cstar
-         Prs = Pslp(t) / 1000  # surface pressure scaling
-         GasExchange <- (kw(t) / mixedLayer(t)) * Csat * ((1 + B(t)) * Prs - o) # positive gas exchange increases the concentration in the mixed layer
-         Entrainment <- dhdt * (Cbottom(t) - C) # positive entrainment increases the concentration in the mixed layer
-         dC <- GasExchange + Entrainment
-        list(c(dC))
-    })
-}
-
-#' Rate of change in mixed layer
-#'
-#' Calculates rate of change in mixed layer depth for NCP estimation
-#' returns positive value for MLD deepening i.e. Entrainment, otherwise returns 0
-#' called by run_ncp functions
-#' @param h0 the mixed layer depth at time 0
-#' @param h1 the mixed layer depth at time 1
-#' @param time a vector containing the maximum time interval
-#' @return the rate of change in mixed layer depth, or 0 if h1 < h0
-#' @keywords mixed layer depth entrainment
-calc_dhdt <- function(h0, h1, time, entrainmentOff){
-    # calculate rate of change in mixed layer depth over time
-    # returns 0 for negative change
-    dhdt = (h1-h0)/max(time)
-    if((dhdt < 0) | entrainmentOff == T){
-        return(0)
-    }
-    else{
-        return(dhdt)
-    }
 }
