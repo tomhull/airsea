@@ -1,6 +1,6 @@
-#       Viscosity and density of water
+###       Viscosity and density of water functions
 
-#' LaLiberte viscosity
+#' Pure water viscosity
 #'
 #' Viscosity of pure water according to LaLiberte 2007
 #'
@@ -9,16 +9,31 @@
 #' @return viscosity of pure water in cP (mPa s-1)
 #' @keywords viscosity
 #' @references LaLiberte 2007
+#' @export
 n_0 <- function(T){
         (T+246)/(137.37+(5.2842*T)+(0.05594*(T^2)))
 }
 
-n_sw <- function(T,S,return_relative_viscotiy=0){
+
+#' Seawater viscosity
+#'
+#' Viscosity of seawater
+#'
+#' @details TODO
+#' @param T vector of temperature in degrees Centigrade
+#' @param S vector of salinity
+#' @param return_relative_viscosity optional, if True returns relative viscosity (i.e. viscosity scaling factor), default is False.
+#' @return viscosity of seawater water in TODO kg/m/s
+#' @keywords seawater viscosity
+#' @references Hardy 1953
+#' @references LaLiberte 2007
+#' @export
+n_sw <- function(T, S, return_relative_viscosity=FALSE){
     #calculate the dynamic viscosity of seawater in cP using the viscosity model / mixing rule approach of LaLiberte 2007
     #to return relative viscosity (i.e. viscosity scaling factor) for comparison with other studies, pass n_sw a final argument of "1"
     #after T and S e.g. n_sw(10,35,1)
         #read in a data file containing the mass fraction of each constituent solute in seawater per salinity unit in per mil and the coefficients determined by LaLiberte 2007 for each salt
-        # sw_cmf<-read.table("sw_constituent_mass_fractions.dat", header = TRUE, row.names = 1)
+        data(sw_cmf, envir=environment()) # FIXME probably not how you're meant to do this
         #w_i_ln_n_i_tot is the sum of the product of the mass fraction and the natural log of the viscosities contributed by each solute individually (see LaLiberte 2007, equation 8)
         w_i_ln_n_i_tot <-0
         #sum up the mass fractions to get water mass fraction
@@ -40,18 +55,10 @@ n_sw <- function(T,S,return_relative_viscotiy=0){
             w_i_ln_n_i_tot <- w_i_ln_n_i_tot + (w_i*log(n_i))
         }
         ln_n_m<- (1-w_i_tot)*log(n_0(T))+w_i_ln_n_i_tot
-        if (return_relative_viscotiy==0) exp(ln_n_m) else
+        if (return_relative_viscosity==FALSE) exp(ln_n_m) else
             (exp(ln_n_m)/n_0(T))
 }
 
-n_sw_hardy <- function(T,n_zero=1){
-    #Non-salinity dependent Hardy  1953 method for calculating viscosity - not used in calculations, purely for comparison with Laliberte method.
-    # η = η0 * K/[1+0.03338.T + 0.00018325.T2]
-    # use n_zero = 1 to use Laliberte n_0 or n_zero=0 for Hardy n_0
-        if (n_zero==0) n0<- 1.787 else
-            n0 <- n_0(T)
-        (n0*1.052/(1+(0.03338*T)+(0.00018325*(T^2))))
-}
 
 #' Seawater density
 #'
@@ -59,11 +66,12 @@ n_sw_hardy <- function(T,n_zero=1){
 #'
 #' @details TODO
 #' @param T vector of temperature in degrees Centigrade
+#' @param S vector of salinity
 #' @return density of seawater in kg m-3
 #' @keywords seawater density
 #' @references Millero and Poisson (1981)
 #' @export
-p_sw <- function(T,S){
+p_sw <- function(T, S){
         #coefficients for millero calc
         A <- 0.824493-(0.0040899*T)+(0.000076438*(T^2))-(0.00000082467*(T^3))+(0.0000000053875*(T^4))
         B <- -0.00572466+(0.00010277*T)-(0.0000016546*(T^2))
@@ -74,6 +82,18 @@ p_sw <- function(T,S){
         (p_o+(A*S)+(B*(S^(3/2)))+(C*S))
 }
 
+
+#' Seawater dynamic viscosity
+#'
+#' TODO calculate kinmatic viscosity of seawater in cm/s for Schmidt number calculation
+#'
+#' @details TODO
+#' @param T vector of temperature in degrees Centigrade
+#' @param S vector of salinity
+#' @return dynamic viscosity of seawater in cm/s
+#' @keywords seawater dynamic viscosity
+#' @references TODO
+#' @export
 v_sw <- function(T,S) {
     #calculate kinmatic viscosity of seawater in cm/s for Schmidt number calculation
         # dynamic viscosity - convert to S.I. (Kg/m/s)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/viscDen.R
 \name{n_0}
 \alias{n_0}
-\title{LaLiberte viscosity}
+\title{Pure water viscosity}
 \usage{
 n_0(T)
 }

@@ -1,0 +1,5 @@
+require(devtools)
+require(roxygen2)
+document()
+install('airsea')
+# check()

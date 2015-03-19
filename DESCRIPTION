@@ -7,6 +7,7 @@ Authors@R: c( person('Tom', 'Hull', email = 'tom.hull@cefas.co.uk', role =
 Description: Provides tools for calculating and exploring air-sea gas
     interactions. Includes calculation of net community production (NCP) via
     continuous measurement of O_2_.
-Depends:
-    R (>= 3.1.0)
+Depends: 
+    R (>= 3.0.0)
 License: GPL-2
+Suggests: testthat
