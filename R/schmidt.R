@@ -1,5 +1,17 @@
 #           Schmidt number calculations
 
+#' compounds
+#'
+#' compounds for Schmidt number calculations
+#'
+#' @format oA data frame with 53940 rows and 10 variables:
+#'\describe{
+#' \item{price}{usdollars}
+#' \item{price}{usdollars}
+#' }
+#' @source FIXME Martin made it up
+"compounds"
+
 #' molar volume
 #'
 #' Calculates the molar volume at boiling point using the Schroeder method, or takes overruling value from compounds data.
@@ -13,7 +25,6 @@
 #' @references TODO
 #' @export
 Vb <- function(compound){
-    data(compounds, envir=environment())
     ringval<-ifelse(compounds[compound,"rings"]>0,-7,0)
     ifelse(compounds[compound,"Vb"]>0,compounds[compound,"Vb"],7*(compounds[compound,"C"]+compounds[compound,"H"]+compounds[compound,"O"]+compounds[compound,"N"]+compounds[compound,"db"])+14*compounds[compound,"tb"]+31.5*compounds[compound,"Br"]+24.5*compounds[compound,"Cl"]+10.5*compounds[compound,"F"]+38.5*compounds[compound,"I"]+21*compounds[compound,"S"]+32*compounds[compound,"Se"]+ringval)	
 }

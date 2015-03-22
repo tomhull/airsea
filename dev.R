@@ -1,5 +1,5 @@
 require(devtools)
 require(roxygen2)
 document()
-install('airsea')
+install()
 # check()

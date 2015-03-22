@@ -1,5 +1,18 @@
 ###       Viscosity and density of water functions
 
+#' Mass fractions
+#'
+#' Mass fractions
+#'
+#' @format oA data frame with 53940 rows and 10 variables:
+#'\describe{
+#' \item{price}{usdollars}
+#' \item{price}{usdollars}
+#' }
+#' @source FIXME Martin made it up
+"sw_cmf"
+
+
 #' Pure water viscosity
 #'
 #' Viscosity of pure water according to LaLiberte 2007
@@ -33,7 +46,7 @@ n_sw <- function(T, S, return_relative_viscosity=FALSE){
     #to return relative viscosity (i.e. viscosity scaling factor) for comparison with other studies, pass n_sw a final argument of "1"
     #after T and S e.g. n_sw(10,35,1)
         #read in a data file containing the mass fraction of each constituent solute in seawater per salinity unit in per mil and the coefficients determined by LaLiberte 2007 for each salt
-        data(sw_cmf, envir=environment()) # FIXME probably not how you're meant to do this
+        # data(sw_cmf, envir=environment()) # FIXME probably not how you're meant to do this
         #w_i_ln_n_i_tot is the sum of the product of the mass fraction and the natural log of the viscosities contributed by each solute individually (see LaLiberte 2007, equation 8)
         w_i_ln_n_i_tot <-0
         #sum up the mass fractions to get water mass fraction

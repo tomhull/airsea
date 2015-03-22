@@ -4,7 +4,7 @@
 \alias{n_sw}
 \title{Seawater viscosity}
 \usage{
-n_sw(T, S, return_relative_viscotiy = 0)
+n_sw(T, S, return_relative_viscosity = FALSE)
 }
 \arguments{
 \item{T}{vector of temperature in degrees Centigrade}
