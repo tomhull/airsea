@@ -12,7 +12,7 @@
 #' @param S vector of salinity
 #' @param method optional string determining kw parameterisation to use, see XXX for list default is 'WA09' (Wanninkhof et al, 2009)
 #' @param normalize optional integer Schmitt number, if not 0 kw values are normalised to specified Schmitt number. Default is 0
-#' @param schmidt_formulation, TODO. Default is 0
+#' @param schmidt_method, TODO. Default is 0
 #' @return vector of gas transfer velocity in meters per second
 #' @keywords kw gas exchange transfer velocity
 #' @references Wanninkhof, R., Asher, W. E., Ho, D. T., Sweeney, C., & McGillis, W. R. (2009).  'Advances in Quantifying Air-Sea Gas Exchange and Environmental Forcing*. Annual Review of Marine Science, 1(1), 213-244. doi:10.1146/annurev.marine.010908.163742
@@ -22,32 +22,31 @@
 #' kw('O2', 10, 7, 35)  # gas transfer velocity for oxygen at 10oC, 7 m-1 s-1 winds and 35 salinity.
 #' @export
 
-kw <- function(compound, T, u, S, method = 'WA09', normalize=0, schmidt_formulation=0){
-    Wann09 <- function(compound, T, u, S, normalize=0, schmidt_formulation=0){
+kw <- function(compound, T, u, S, method = 'WA09', normalize = 0, schmidt_method = 'mean'){
+    Wann09 <- function(compound, T, u, S, normalize=0, schmidt_method){
         # Kw parametrisation of Wanninkhof2009
         # output in meters per second
         if (normalize!=0) schmidt_number <- normalize else
-            schmidt_number <- Sch(compound, T, S, schmidt_formulation)
+            schmidt_number <- Sch(compound, T, S, schmidt_method)
         (3 + (0.1 * u) + (0.064 * u^2) + (0.011 * u^3)) * ((schmidt_number / 660)^(-0.5)) / (100 * 3600)
     }
-    Nightingale00 <- function(compound, T, u, S, normalize=0, schmidt_formulation=0){
+    Nightingale00 <- function(compound, T, u, S, normalize, schmidt_method){
         # empirical fit to dual tracer data by Nightingale et al 2000 (GBC)
-#' @export
         # note k600 not k660 for their study
         if (normalize!=0) schmidt_number <- normalize else
-            schmidt_number <- Sch(compound, T, S, schmidt_formulation)
+            schmidt_number <- Sch(compound, T, S, schmidt_method)
         (((0.222*u^2)+0.333*u)*(schmidt_number/600)^(-0.5))/(100*3600)
     }
-    Wann92 <- function (compound, T, u, S, normalize=0, schmidt_formulation=0){
+    Wann92 <- function (compound, T, u, S, normalize, schmidt_method){
         #calculate kw transfer velocity in m/s according to Wanninkhof 1992
         if (normalize!=0) schmidt_number <- normalize else
-            schmidt_number <- Sch(compound, T, S, schmidt_formulation)
+            schmidt_number <- Sch(compound, T, S, schmidt_method)
         (0.31*u^2*((schmidt_number/660)^(-0.5)))/(100*3600)
     }
     switch(method,
-           WA09 = Wann09(compound, T, u, S, normalize, schmidt_formulation),
-           NG00 = Nightingale00(compound, T, u, S, normalize, schmidt_formulation),
-           WA92 = Wann92(compound, T, u, S, normalize, schmidt_formulation),
+           WA09 = Wann09(compound, T, u, S, normalize, schmidt_method),
+           NG00 = Nightingale00(compound, T, u, S, normalize, schmidt_method),
+           WA92 = Wann92(compound, T, u, S, normalize, schmidt_method)
            )
 }
 

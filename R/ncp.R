@@ -1,5 +1,6 @@
 # functions for oxygen based NCP calculations
 
+
 #' timeseries translator
 #'
 #' divides up timeseries for NCP calculation
@@ -36,71 +37,84 @@ transform_data <- function(x){
 #'
 #' calculate NCP based on O2 observations
 #'
-#' @details TODO
-#' @param x data frame matching the format outlined in XXX
+#' @details TODO  use x$ncp = apply(x, 1, O2NCP)
+#' @param dat data frame matching the format outlined in XXX
 #' @param entrainment if True (default) calculate NCP with entrainment, Cb0 and Cb1 must be supplied
+#' @param kw.method character string passed to kw, default is 'WA09'
 #' @return a vector of NCP in uMol/l
 #' @export
-O2NCP <- function(x, entrainment = T){
-    with(x, {
 
-    ti = timePeriod
 
-     if(entrainment == T){
-        if('Cb0' %in% names(x) & 'Cb1' %in% names(x)){
-            stop('Cb0 or Cb1 not supplied')
-        }else{
-            # calculate dhdt
-            if(h1 - h0 > 0){
-                dhdt = (h1 - h0) / ti
-            }
+applyer <- function(dat){
+    apply(dat, 1, O2NCP)
+}
 
-        }
-    }else{
-        dhdt = 0
-     }
+O2NCP <- function(dat, entrainment = T, kw_method = 'WA09'){
+    ti = dat['timePeriod']
+    dhdt = 0
 
-    r0 = (kw0 / h0) + dhdt # -r = everything that multiples C (residence time + entrainment rate)
-    r1 = (kw1 / h1) + dhdt # -r = everything that multiples C
+    # variable interpolators
+        mld = approxfun(c(0, ti),c(dat['h0'], dat['h1']))
+        temp = approxfun(c(0, ti), c(dat['T0'], dat['T1']))
+        sal = approxfun(c(0, ti), c(dat['S0'], dat['S1']))
+        ws = approxfun(c(0, ti), c(dat['u0'], dat['u1']))
+        Cb = approxfun(c(0, ti),c(dat['Cb0'], dat['Cb1']))
 
-    rtx = approxfun(c(0, ti),c(r0, r1))
-
-    Rt <- function(x){
-        # vectorised
-        return(sapply(x, function(y) integrate(rtx, lower = 0, upper = y)$value))
+    Csat.t <- function(tx){
+        # calculate oxygen saturation at tx
+        return(Csat(temp(tx), sal(tx)))
     }
 
-    Q2.f <- function(x){
-        return(exp(Rt(x)))
+    rtx <- function(tx){
+        # returns r at tx (any point between t0 and t1)
+        kw('O2', temp(tx), ws(tx), sal(tx), kw_method) / mld(tx) + dhdt
     }
+
+    Rt <- function(tx){
+        # vectorised, integrates rtx up to suppled time
+        return(sapply(tx, function(y) integrate(rtx, lower = 0, upper = y)$value))
+    }
+
+    Q2.f <- function(tx){
+        # exponential of integrated r at supplied time
+        return(exp(Rt(tx)))
+    }
+        # integrate exponential of integrated r at t1
     Q2 = integrate(Q2.f, lower = 0, upper = ti)$value
 
-        # q
+        # G
 
-    qtx <- function(x){
-        kw = approxfun(c(0, ti),c(kw0, kw1))
-        h = approxfun(c(0, ti),c(h0, h1))
-        B = approxfun(c(0, ti),c(B0, B1))
-        Cb = approxfun(c(0, ti),c(Cb0, Cb1))
-        temp = approxfun(c(0, ti), c(T0, T1))
-        sal = approxfun(c(0, ti), c(S0, S1))
-
-        CstarGG.t <- function(x){
-            return(CstarGG(sal(x), temp(x)))
-        }
-        qx = (kw(x) / h(x)) * CstarGG.t(x) * (1 + B(x)) * 1 + (dhdt * Cb(x))
-        return(qx)
+    Gtx <- function(tx, kw.method){
+            # kw at tx
+        kwx = kw('O2', temp(tx), ws(tx), sal(tx), method = kw_method)
+            # return flux at tx
+        Gx = (kwx / mld(tx)) * Csat.t(tx) * (1 + bubbleSat('O2', ws(tx))) * 1 + (dhdt * Cb(tx))
+        return(Gx)
     }
 
-    Q1.f <- function(x){
-        qtx(x) * exp(Rt(x))
+    Q1.f <- function(tx){
+        Gtx(tx) * exp(Rt(tx))
     }
+
     Q1 = integrate(Q1.f, lower = 0, upper = ti)$value
-    print(c(Q1, Q2, C0, C1, exp(Rt(ti)), qtx(ti)))
 
-        # J
+    print(c(Q1, Q2, dat['C0'], dat['C1'], exp(Rt(ti)), Gtx(ti)))
 
-    J = (C1 * exp(Rt(ti)) - C0 - Q1) / Q2
-    return(J * ti)
-           })
+        # calculate NCP (J)
+
+    J = (dat['C1'][1] * exp(Rt(ti)) - dat['C0'][1] - Q1) / Q2
+    return(J * ti) # return as uMol per supplied time
 }
+
+
+#' NCP test data
+#'
+#' example data for testing NCP calculations
+#'
+#' @format a data frame with 53940 rows and 10 variables:
+#'\describe{
+#' \item{price}{usdollars}
+#' \item{price}{usdollars}
+#' }
+#' @source FIXME Tom
+"ncpTest"
