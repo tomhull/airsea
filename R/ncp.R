@@ -33,7 +33,8 @@ O2NCP <- function(dat, entrainment = T, kw_method = 'WA09'){
             # kw at tx
         kwx = kw('O2', temp(tx), ws(tx), sal(tx), method = kw_method)
             # return flux at tx
-        Gx = (kwx / mld(tx)) * Csat.t(tx) * (1 + bubbleSat('O2', ws(tx))) * 1 + (dhdt * Cb(tx))
+        Prs = Pslp(tx) / 1000  # surface pressure scaling
+        Gx = (kwx / mld(tx)) * Csat.t(tx) * (1 + bubbleSat('O2', ws(tx))) * Prs + (dhdt * Cb(tx))
         return(Gx)
     }
     Q1.f <- function(tx){
@@ -61,6 +62,7 @@ O2NCP <- function(dat, entrainment = T, kw_method = 'WA09'){
         temp = approxfun(c(0, ti), c(dat[i,]$T0, dat[i,]$T1))
         sal  = approxfun(c(0, ti), c(dat[i,]$S0, dat[i,]$S1))
         ws   = approxfun(c(0, ti), c(dat[i,]$u0, dat[i,]$u1))
+        Pslp   = approxfun(c(0, ti), c(dat[i,]$Pslp0, dat[i,]$Pslp1))
         Cb   = approxfun(c(0, ti), c(dat[i,]$Cb0, dat[i,]$Cb1))
 
     Q2 = integrate(Q2.f, lower = 0, upper = ti)$value
