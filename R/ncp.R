@@ -76,6 +76,48 @@ O2NCP <- function(dat, entrainment = T, kw_method = 'WA09'){
     return(ncp)
 }
 
+#' O2 NCP simplified (mean)
+#'
+#' calculate NCP based on O2 observations, using mean variables
+#'
+#' @details TODO
+#' @param dat data frame matching the format outlined in XXX
+#' @param entrainment if True (default) calculate NCP with entrainment
+#' @param kw_error
+#' @param B_error
+#' @param Csat_error
+#' @return a vector of NCP in uMol/l per m-2 per supplied time interval
+#' @export
+O2NCP.simple <- function(dat, entrainment = T, kw_error = 0, B_error = 0, Csat_error = 0){
+    # expects single row of LHS style data.frame
+    # works with all factors constant
+    with(dat, {
+             if('Cb0' %in% names(dat)){Cb = (Cb0 + Cb1)/2}else{Cb = 0} # check if bottom o2 available
+             # calculate averages
+             k = (kw('O2', T0, u0, S0) + kw('O2', T1, u1, S1))/2
+             k = k + ((k / 100) * kw_error) # apply kw error
+             h = (h0 + h1)/2
+             Prs = ((Pslp0 + Pslp1)/2) / 1000  # surface pressure scaling
+             B = (bubbleSat('O2', u0) + bubbleSat('O2', u1))/2
+             B = B + ((B / 100) * B_error) # apply bubble error
+             S = (Csat(T0, S0) + Csat(T1, S1))/2
+             S = S + ((S / 100) * Csat_error) # apply bubble error
+             ti = timePeriod
+             if(entrainment == T){
+                 dhdt = (h1 - h0)/ti # calculate entrainment
+                 dhdt[dhdt < 0] = 0
+             }else{
+                 dhdt = 0
+             }
+
+             q. = (k/h)*S*(1 + B) * Prs + (dhdt * Cb) # q = everything except J that doesn't multiply C
+             r = (k / h) + dhdt # -r = everything that multiples C (residence time)
+
+             J = r*(((C1 - q./r) * exp(r * ti) - (C0 - q./r))/ (exp(r * ti) - 1))
+             return(J * ti)
+           })
+}
+
 
 #' NCP test data
 #'
