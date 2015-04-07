@@ -15,11 +15,15 @@ O2NCP <- function(dat, entrainment = T, kw_method = 'WA09'){
     #subfunctions
     Csat.t <- function(tx){
         # calculate oxygen saturation at tx
-        return(Csat(temp(tx), sal(tx)))
+             S = Csat(temp(tx), sal(tx))
+             S = S + ((S / 100) * Csat_error) # apply bubble error
+        return(S)
     }
     rtx <- function(tx){
         # returns r at tx (any point between t0 and t1)
-        kw('O2', temp(tx), ws(tx), sal(tx), kw_method) / mld(tx) + dhdt
+        k = kw('O2', temp(tx), ws(tx), sal(tx), kw_method)
+        k = k + ((k / 100) * kw_error) # apply kw error
+        k / mld(tx) + dhdt
     }
     Rt <- function(tx){
         # vectorised, integrates rtx up to suppled time
@@ -29,23 +33,25 @@ O2NCP <- function(dat, entrainment = T, kw_method = 'WA09'){
         # exponential of integrated r at supplied time
         return(exp(Rt(tx)))
     }
-    Gtx <- function(tx, kw.method){
+    Gtx <- function(tx){
             # kw at tx
         kwx = kw('O2', temp(tx), ws(tx), sal(tx), method = kw_method)
+        kwx = kwx + ((kwx / 100) * kw_error) # apply kw error
             # return flux at tx
         Prs = Pslp(tx) / 1000  # surface pressure scaling
-        Gx = (kwx / mld(tx)) * Csat.t(tx) * (1 + bubbleSat('O2', ws(tx))) * Prs + (dhdt * Cb(tx))
+        B = bubbleSat('O2', ws(tx))
+        B = B + ((B / 100) * B_error) # apply bubble error
+        Gx = (kwx / mld(tx)) * Csat.t(tx) * (1 + B ) * Prs + (dhdt * Cb(tx))
         return(Gx)
     }
     Q1.f <- function(tx){
-        Gtx(tx) * exp(Rt(tx))
+        return(Gtx(tx) * exp(Rt(tx)))
     }
     calc_dhdt <- function(h0, h1, times, entrainment){
         # calculate rate of change in mixed layer depth over time
         # returns 0 for negative change
         dhdt = (h1-h0)/max(times)
         if(entrainment & dhdt > 0){
-            print('Entraining')
             return(dhdt)
         }
         else{
@@ -56,14 +62,28 @@ O2NCP <- function(dat, entrainment = T, kw_method = 'WA09'){
     ncp = vector()
     for(i in 1:nrow(dat)){
     # variable interpolators, can't be vectorised
-    ti = dat[i,]$timePeriod
-    dhdt = calc_dhdt(dat[i,]$h0, dat[i,]$h1, ti, entrainment)
-        mld  = approxfun(c(0, ti), c(dat[i,]$h0, dat[i,]$h1))
-        temp = approxfun(c(0, ti), c(dat[i,]$T0, dat[i,]$T1))
-        sal  = approxfun(c(0, ti), c(dat[i,]$S0, dat[i,]$S1))
-        ws   = approxfun(c(0, ti), c(dat[i,]$u0, dat[i,]$u1))
-        Pslp   = approxfun(c(0, ti), c(dat[i,]$Pslp0, dat[i,]$Pslp1))
-        Cb   = approxfun(c(0, ti), c(dat[i,]$Cb0, dat[i,]$Cb1))
+    ti = dat$timePeriod[i]
+    dhdt = calc_dhdt(dat$h0[i], dat$h1[i], ti, entrainment)
+        mld  = approxfun(c(0, ti), c(dat$h0[i], dat$h1[i]))
+        temp = approxfun(c(0, ti), c(dat$T0[i], dat$T1[i]))
+        sal  = approxfun(c(0, ti), c(dat$S0[i], dat$S1[i]))
+        ws   = approxfun(c(0, ti), c(dat$u0[i], dat$u1[i]))
+        Pslp   = approxfun(c(0, ti), c(dat$Pslp0[i], dat$Pslp1[i]))
+        if("Cb0" %in% colnames(dat)){
+            Cb   = approxfun(c(0, ti), c(dat$Cb0[i], dat$Cb1[i]))
+        }else{
+            Cb   = approxfun(c(0, ti), c(0, 0))
+        }
+            # error vectors
+        if("kw_error" %in% colnames(dat)){
+            kw_error = dat$kw_error[i]
+        }else{ kw_error = 0 }
+        if("B_error" %in% colnames(dat)){
+            B_error = dat$B_error[i]
+        }else{ B_error = 0 }
+        if("Csat_error" %in% colnames(dat)){
+            Csat_error = dat$Csat_error[i]
+        }else{ Csat_error = 0 }
 
     Q2 = integrate(Q2.f, lower = 0, upper = ti)$value
     Q1 = integrate(Q1.f, lower = 0, upper = ti)$value
@@ -83,14 +103,15 @@ O2NCP <- function(dat, entrainment = T, kw_method = 'WA09'){
 #' @details TODO
 #' @param dat data frame matching the format outlined in XXX
 #' @param entrainment if True (default) calculate NCP with entrainment
-#' @param kw_error
-#' @param B_error
-#' @param Csat_error
 #' @return a vector of NCP in uMol/l per m-2 per supplied time interval
 #' @export
-O2NCP.simple <- function(dat, entrainment = T, kw_error = 0, B_error = 0, Csat_error = 0){
+O2NCP.simple <- function(dat, entrainment = T){
     # expects single row of LHS style data.frame
     # works with all factors constant
+    if(!"kw_error" %in% colnames(dat)){kw_error = 0}
+    if(!"B_error" %in% colnames(dat)){B_error = 0}
+    if(!"Csat_error" %in% colnames(dat)){Csat_error = 0}
+
     with(dat, {
              if('Cb0' %in% names(dat)){Cb = (Cb0 + Cb1)/2}else{Cb = 0} # check if bottom o2 available
              # calculate averages
