@@ -9,9 +9,10 @@
 #' @param dat data frame matching the format outlined in XXX
 #' @param entrainment if True (default) calculate NCP with entrainment, Cb0 and Cb1 must be supplied
 #' @param kw_method character string passed to kw, default is 'WA09'
-#' @return a vector of NCP in uMol/l per m-2 per supplied time interval
+#' @param asVolume if True NCP is not multipled by average mixed layer depth
+#' @return a vector of NCP in mmol per m-3 per supplied time interval, or mmol per m-3 if asVolume is True.
 #' @export
-O2NCP <- function(dat, entrainment = T, kw_method = 'WA09'){
+O2NCP <- function(dat, entrainment = T, kw_method = 'WA09', asVolume = F){
     #subfunctions
     Csat.t <- function(tx){
         # calculate oxygen saturation at tx
@@ -91,9 +92,13 @@ O2NCP <- function(dat, entrainment = T, kw_method = 'WA09'){
         # calculate NCP (J)
 
     J = (dat[i,]$C1 * exp(Rt(ti)) - dat[i,]$C0 - Q1) / Q2
-    ncp = c(ncp, J * ti) # return as uMol per supplied time per unit area
     }
-    return(ncp)
+    if(asVolume == T){
+        return(c(ncp, J * ti)) # return as mmol m-3 per supplied time
+    }
+    else{
+        return(c(ncp, J * ti * ((dat$h0 + dat$h1)/2))) # return as mmol m-2 per supplied time
+    }
 }
 
 #' O2 NCP simplified (mean)
@@ -103,9 +108,10 @@ O2NCP <- function(dat, entrainment = T, kw_method = 'WA09'){
 #' @details TODO
 #' @param dat data frame matching the format outlined in XXX
 #' @param entrainment if True (default) calculate NCP with entrainment
-#' @return a vector of NCP in uMol/l per m-2 per supplied time interval
+#' @param asVolume if True NCP is not multipled by average mixed layer depth
+#' @return a vector of NCP in mmol per m-3 per supplied time interval, or mmol per m-3 if asVolume is True.
 #' @export
-O2NCP.simple <- function(dat, entrainment = T){
+O2NCP.simple <- function(dat, entrainment = T, asVolume = F){
     # expects single row of LHS style data.frame
     # works with all factors constant
     if(!"kw_error" %in% colnames(dat)){kw_error = 0}
@@ -135,7 +141,12 @@ O2NCP.simple <- function(dat, entrainment = T){
              r = (k / h) + dhdt # -r = everything that multiples C (residence time)
 
              J = r*(((C1 - q./r) * exp(r * ti) - (C0 - q./r))/ (exp(r * ti) - 1))
-             return(J * ti)
+             if(asVolume == T){
+                 return(J * ti)) # return as mmol m-3 per supplied time
+             }
+             else{
+                 return(J * ti * ((dat$h0 + dat$h1)/2))) # return as mmol m-2 per supplied time
+             }
            })
 }
 
