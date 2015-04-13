@@ -91,14 +91,15 @@ O2NCP <- function(dat, entrainment = T, kw_method = 'WA09', asVolume = F){
 
         # calculate NCP (J)
 
-    J = (dat[i,]$C1 * exp(Rt(ti)) - dat[i,]$C0 - Q1) / Q2
-    }
+    J = (dat$C1[i] * exp(Rt(ti)) - dat$C0[i] - Q1) / Q2
     if(asVolume == T){
-        return(c(ncp, J * ti)) # return as mmol m-3 per supplied time
-    }
+        ncp = c(ncp, J * ti) # return as mmol m-3 per supplied time
+        }
     else{
-        return(c(ncp, J * ti * ((dat$h0 + dat$h1)/2))) # return as mmol m-2 per supplied time
+        ncp = c(ncp, J * ti * ((dat$h0[i] + dat$h1[i])/2)) # return as mmol m-2 per supplied time
+        }
     }
+    return(ncp)
 }
 
 #' O2 NCP simplified (mean)
@@ -142,10 +143,10 @@ O2NCP.simple <- function(dat, entrainment = T, asVolume = F){
 
              J = r*(((C1 - q./r) * exp(r * ti) - (C0 - q./r))/ (exp(r * ti) - 1))
              if(asVolume == T){
-                 return(J * ti)) # return as mmol m-3 per supplied time
+                 return(J * ti) # return as mmol m-3 per supplied time
              }
              else{
-                 return(J * ti * ((dat$h0 + dat$h1)/2))) # return as mmol m-2 per supplied time
+                 return(J * ti * ((dat$h0 + dat$h1)/2)) # return as mmol m-2 per supplied time
              }
            })
 }
