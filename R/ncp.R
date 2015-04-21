@@ -108,19 +108,20 @@ O2NCP <- function(dat, entrainment = T, kw_method = 'WA09', asVolume = F){
 #'
 #' @details TODO
 #' @param dat data frame matching the format outlined in XXX
-#' @param entrainment if True (default) calculate NCP with entrainment
 #' @param asVolume if True NCP is not multipled by average mixed layer depth
 #' @return a vector of NCP in mmol per m-3 per supplied time interval, or mmol per m-3 if asVolume is True.
 #' @export
-O2NCP.simple <- function(dat, entrainment = T, asVolume = F){
+O2NCP.simple <- function(dat, asVolume = F){
     # expects single row of LHS style data.frame
     # works with all factors constant
     if(!"kw_error" %in% colnames(dat)){kw_error = 0}
     if(!"B_error" %in% colnames(dat)){B_error = 0}
     if(!"Csat_error" %in% colnames(dat)){Csat_error = 0}
+        # if entrainment state variables found use them
+    if("entrainment" %in% colnames(dat)){use_entrainment = T}else{use_entrainment = F}
 
     with(dat, {
-             if('Cb0' %in% names(dat)){Cb = (Cb0 + Cb1)/2}else{Cb = 0} # check if bottom o2 available
+
              # calculate averages
              k = (kw('O2', T0, u0, S0) + kw('O2', T1, u1, S1))/2
              k = k + ((k / 100) * kw_error) # apply kw error
@@ -130,11 +131,19 @@ O2NCP.simple <- function(dat, entrainment = T, asVolume = F){
              B = B + ((B / 100) * B_error) # apply bubble error
              S = (Csat(T0, S0) + Csat(T1, S1))/2
              S = S + ((S / 100) * Csat_error) # apply bubble error
+             if('Cb0' %in% names(dat)){
+                 Cb = (Cb0 + Cb1)/2
+             }
+             else{Cb = 0} # check if bottom o2 available
              ti = timePeriod
-             if(entrainment == T){
-                 dhdt = (h1 - h0)/ti # calculate entrainment
-                 dhdt[dhdt < 0] = 0
+
+            # are we going to calculate entrainment?
+             if(use_entrainment == T){
+                dhdt = (h1 - h0)/ti # calculate entrainment
+                dhdt[dhdt < 0] = 0
+                dhdt[entrainment == F] = 0
              }else{
+                 # if not set to 0 for no entrainment
                  dhdt = 0
              }
 
