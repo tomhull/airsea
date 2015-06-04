@@ -11,3 +11,4 @@ Depends:
     R (>= 3.0.0)
 License: GPL-2
 Suggests: testthat
+LazyData: TRUE
