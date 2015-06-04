@@ -18,6 +18,7 @@
 #' @references Wanninkhof, R., Asher, W. E., Ho, D. T., Sweeney, C., & McGillis, W. R. (2009).  'Advances in Quantifying Air-Sea Gas Exchange and Environmental Forcing*. Annual Review of Marine Science, 1(1), 213-244. doi:10.1146/annurev.marine.010908.163742
 #' @references TODO Nightingale et al 2000 (GBC)
 #' @references TODO Wanninkhof et al 1992
+#' @references TODO Wanninkhof 2014
 #' @examples
 #' kw('O2', 10, 7, 35)  # gas transfer velocity for oxygen at 10oC, 7 m-1 s-1 winds and 35 salinity.
 #' @export
