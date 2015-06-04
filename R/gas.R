@@ -30,6 +30,13 @@ kw <- function(compound, T, u, S, method = 'WA09', normalize = 0, schmidt_method
             schmidt_number <- Sch(compound, T, S, schmidt_method)
         (3 + (0.1 * u) + (0.064 * u^2) + (0.011 * u^3)) * ((schmidt_number / 660)^(-0.5)) / (100 * 3600)
     }
+    Wann13 <- function(compound, T, u, S, normalize=0, schmidt_method){
+        # Kw parametrisation of Wanninkhof2014
+        # output in meters per second
+        if (normalize!=0) schmidt_number <- normalize else
+            schmidt_number <- Sch(compound, T, S, schmidt_method)
+        (0.251 * u^2) * ((schmidt_number / 660)^(-0.5)) / (100 * 3600)
+    }
     Nightingale00 <- function(compound, T, u, S, normalize, schmidt_method){
         # empirical fit to dual tracer data by Nightingale et al 2000 (GBC)
         # note k600 not k660 for their study
@@ -45,6 +52,7 @@ kw <- function(compound, T, u, S, method = 'WA09', normalize = 0, schmidt_method
     }
     switch(method,
            WA09 = Wann09(compound, T, u, S, normalize, schmidt_method),
+           WA13 = Wann13(compound, T, u, S, normalize, schmidt_method),
            NG00 = Nightingale00(compound, T, u, S, normalize, schmidt_method),
            WA92 = Wann92(compound, T, u, S, normalize, schmidt_method)
            )
