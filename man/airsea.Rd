@@ -6,6 +6,11 @@
 \alias{airsea-package}
 \title{airsea.}
 \description{
-airsea.
+package for doing stuff with the sea and the air
+}
+\references{
+Hull et al (2015)
+
+Johnson, M. T. (2010)
 }
 

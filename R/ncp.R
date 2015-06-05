@@ -3,7 +3,8 @@
 
 #' O2 NCP
 #'
-#' calculate NCP based on O2 observations
+#' calculate NCP based on O2 observations, assumes linear change in observed values between
+#' timesteps
 #'
 #' @details TODO
 #' @param dat data frame matching the format outlined in XXX
@@ -12,7 +13,7 @@
 #' @param asVolume if True NCP is not multipled by average mixed layer depth
 #' @return a vector of NCP in mmol per m-3 per supplied time interval, or mmol per m-3 if asVolume is True.
 #' @export
-O2NCP <- function(dat, entrainment = T, kw_method = 'WA09', asVolume = F){
+O2NCP.linear <- function(dat, entrainment = T, kw_method = 'WA09', asVolume = F){
     #subfunctions
     Csat.t <- function(tx){
         # calculate oxygen saturation at tx
@@ -104,14 +105,14 @@ O2NCP <- function(dat, entrainment = T, kw_method = 'WA09', asVolume = F){
 
 #' O2 NCP simplified (mean)
 #'
-#' calculate NCP based on O2 observations, using mean variables
+#' calculate NCP based on O2 observations, using mean values of observations
 #'
 #' @details TODO
 #' @param dat data frame matching the format outlined in XXX
 #' @param asVolume if True NCP is not multipled by average mixed layer depth
 #' @return a vector of NCP in mmol per m-3 per supplied time interval, or mmol per m-3 if asVolume is True.
 #' @export
-O2NCP.simple <- function(dat, asVolume = F){
+O2NCP.mean <- function(dat, asVolume = F){
     # expects single row of LHS style data.frame
     # works with all factors constant
     if(!"kw_error" %in% colnames(dat)){kw_error = 0}
@@ -159,16 +160,3 @@ O2NCP.simple <- function(dat, asVolume = F){
              }
            })
 }
-
-
-#' NCP test data
-#'
-#' example data for testing NCP calculations
-#'
-#' @format a data frame with 53940 rows and 10 variables:
-#'\describe{
-#' \item{price}{usdollars}
-#' \item{price}{usdollars}
-#' }
-#' @source FIXME Tom
-"ncpTest"
