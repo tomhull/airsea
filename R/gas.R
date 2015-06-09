@@ -23,7 +23,7 @@
 #' kw('O2', 10, 7, 35)  # gas transfer velocity for oxygen at 10oC, 7 m-1 s-1 winds and 35 salinity.
 #' @export
 
-kw <- function(compound, T, u, S, method = 'WA09', normalize = 0, schmidt_method = 'mean'){
+kw <- function(compound, T, u, S, method = 'WA13', normalize = 0, schmidt_method = 'mean'){
     Wann09 <- function(compound, T, u, S, normalize=0, schmidt_method){
         # Kw parametrisation of Wanninkhof2009
         # output in meters per second

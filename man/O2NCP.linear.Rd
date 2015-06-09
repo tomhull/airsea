@@ -4,14 +4,14 @@
 \alias{O2NCP.linear}
 \title{O2 NCP}
 \usage{
-O2NCP.linear(dat, entrainment = T, kw_method = "WA09", asVolume = F)
+O2NCP.linear(dat, entrainment = T, kw_method = "WA13", asVolume = F)
 }
 \arguments{
 \item{dat}{data frame matching the format outlined in XXX}
 
 \item{entrainment}{if True (default) calculate NCP with entrainment, Cb0 and Cb1 must be supplied}
 
-\item{kw_method}{character string passed to kw, default is 'WA09'}
+\item{kw_method}{character string passed to kw, default is 'WA13'}
 
 \item{asVolume}{if True NCP is not multipled by average mixed layer depth}
 }

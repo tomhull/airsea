@@ -9,11 +9,11 @@
 #' @details TODO
 #' @param dat data frame matching the format outlined in XXX
 #' @param entrainment if True (default) calculate NCP with entrainment, Cb0 and Cb1 must be supplied
-#' @param kw_method character string passed to kw, default is 'WA09'
+#' @param kw_method character string passed to kw, default is 'WA13'
 #' @param asVolume if True NCP is not multipled by average mixed layer depth
 #' @return a vector of NCP in mmol per m-3 per supplied time interval, or mmol per m-3 if asVolume is True.
 #' @export
-O2NCP.linear <- function(dat, entrainment = T, kw_method = 'WA09', asVolume = F){
+O2NCP.linear <- function(dat, entrainment = T, kw_method = 'WA13', asVolume = F){
     #subfunctions
     Csat.t <- function(tx){
         # calculate oxygen saturation at tx
@@ -110,9 +110,10 @@ O2NCP.linear <- function(dat, entrainment = T, kw_method = 'WA09', asVolume = F)
 #' @details TODO
 #' @param dat data frame matching the format outlined in XXX
 #' @param asVolume if True NCP is not multipled by average mixed layer depth
+#' @param kw_method character string passed to kw, default is 'WA13'
 #' @return a vector of NCP in mmol per m-3 per supplied time interval, or mmol per m-3 if asVolume is True.
 #' @export
-O2NCP.mean <- function(dat, asVolume = F){
+O2NCP.mean <- function(dat, asVolume = F, kw_method = 'WA13'){
     # expects single row of LHS style data.frame
     # works with all factors constant
     if(!"kw_error" %in% colnames(dat)){kw_error = 0}

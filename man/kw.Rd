@@ -4,7 +4,7 @@
 \alias{kw}
 \title{water side gas transfer velocity}
 \usage{
-kw(compound, T, u, S, method = "WA09", normalize = 0,
+kw(compound, T, u, S, method = "WA13", normalize = 0,
   schmidt_method = "mean")
 }
 \arguments{

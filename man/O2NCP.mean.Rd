@@ -4,12 +4,14 @@
 \alias{O2NCP.mean}
 \title{O2 NCP simplified (mean)}
 \usage{
-O2NCP.mean(dat, asVolume = F)
+O2NCP.mean(dat, asVolume = F, kw_method = "WA13")
 }
 \arguments{
 \item{dat}{data frame matching the format outlined in XXX}
 
 \item{asVolume}{if True NCP is not multipled by average mixed layer depth}
+
+\item{kw_method}{character string passed to kw, default is 'WA13'}
 }
 \value{
 a vector of NCP in mmol per m-3 per supplied time interval, or mmol per m-3 if asVolume is True.
