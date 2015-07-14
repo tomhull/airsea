@@ -150,7 +150,7 @@ O2NCP.mean <- function(dat, asVolume = F, kw_method = 'WA13'){
              }
 
              r = (k / h) + ((1 / h) * dhdt) #  = everything that multiples C (residence time)
-             f. = (k/h)*S*(1 + B) * Prs + (dhdt * Cb) # q = everything except J that doesn't multiply C
+             f. = (k/h)*S*(1 + B) * Prs + ((1/h) * dhdt * Cb) # q = everything except J that doesn't multiply C
 
              J = r * h * ((C1 - C0) / (1 - exp(-r * ti)) + C0) - f. * h
              if(asVolume == T){
