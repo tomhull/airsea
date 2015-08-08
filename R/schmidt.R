@@ -9,7 +9,7 @@
 #' \item{price}{usdollars}
 #' \item{price}{usdollars}
 #' }
-#' @source FIXME Martin made it up
+#' @source FIXME Martin
 "compounds"
 
 #' molar volume

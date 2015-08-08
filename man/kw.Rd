@@ -4,7 +4,7 @@
 \alias{kw}
 \title{water side gas transfer velocity}
 \usage{
-kw(compound, T, u, S, method = "WA13", normalize = 0,
+kw(compound, T, u, S, method = "WA14", normalize = 0,
   schmidt_method = "mean")
 }
 \arguments{
@@ -18,30 +18,39 @@ kw(compound, T, u, S, method = "WA13", normalize = 0,
 
 \item{method}{optional string determining kw parameterisation to use, see XXX for list default is 'WA09' (Wanninkhof et al, 2009)}
 
-\item{normalize}{optional integer Schmitt number, if not 0 kw values are normalised to specified Schmitt number. Default is 0}
+\item{normalize}{optional integer Schmitt number, if not = 0 kw values are normalised to specified Schmitt number. Default is 0}
 
-\item{schmidt_method,}{TODO. Default is 0}
+\item{schmidt_method,}{see `Sch` documentation for details, Default is 'mean'}
 }
 \value{
 vector of gas transfer velocity in meters per second
 }
 \description{
-By default implements the gas transfer velocity parametrisation of Wanninkhov et al (2009).
+Calculates water side gas transfer velocity (kw).
 }
 \details{
 TODO - K_calcs scheme
+By default implements the gas transfer velocity parametrisation of Wanninkhov, 2014 (WA14).
+utilising XXX'
+Other options are:
+Wanninkhov et al, 2009 (WA09),
+Nighingale et al, 2000 empirical fit to dual tracer data (NG00).
+Wanninkhov, 1992 (WA92).
+set normalize to schmidt number value e.g. 660 to compare with other kw curves.
 }
 \examples{
 kw('O2', 10, 7, 35)  # gas transfer velocity for oxygen at 10oC, 7 m-1 s-1 winds and 35 salinity.
 }
 \references{
-Wanninkhof, R., Asher, W. E., Ho, D. T., Sweeney, C., & McGillis, W. R. (2009).  'Advances in Quantifying Air-Sea Gas Exchange and Environmental Forcing*. Annual Review of Marine Science, 1(1), 213-244. doi:10.1146/annurev.marine.010908.163742
+Johnson, M. T. A numerical scheme to calculate temperature and salinity dependent air-water transfer velocities for any gas. Ocean Sci. Discuss. 7, 251-290 (2010).
 
-TODO Nightingale et al 2000 (GBC)
+Wanninkhof, R. Relationship between wind speed and gas exchange over the ocean revisited. Limnol. Oceanogr. Methods 12, 351-362 (2014).
 
-TODO Wanninkhof et al 1992
+Wanninkhof, R., Asher, W. E., Ho, D. T., Sweeney, C. & McGillis, W. R. Advances in Quantifying Air-Sea Gas Exchange and Environmental Forcing. Ann. Rev. Mar. Sci. 1, 213-244 (2009).
 
-TODO Wanninkhof 2014
+Nightingale, P. D. et al. In situ evaluation of air-sea gas exchange parameterizations using novel conservative and volatile tracers. Global Biogeochem. Cycles 14, 373-387 (2000).
+
+Wanninkhof, R. Relationship between wind speed and gas exchange over the ocean. J. Geophys. Res. 97, 7373 (1992).
 }
 \keyword{exchange}
 \keyword{gas}

@@ -40,7 +40,7 @@ O2NCP.linear <- function(dat, entrainment = T, kw_method = 'WA13', asVolume = F)
         kwx = kw('O2', temp(tx), ws(tx), sal(tx), method = kw_method)
         kwx = kwx + ((kwx / 100) * kw_error) # apply kw error
             # return flux at tx
-        Prs = Pslp(tx) / 1000  # surface pressure scaling
+        Prs = Pslp(tx) / 1013.25  # surface pressure scaling
         B = bubbleSat('O2', ws(tx))
         B = B + ((B / 100) * B_error) # apply bubble error
         Gx = (kwx / mld(tx)) * Csat.t(tx) * (1 + B ) * Prs + (dhdt * Cb(tx))
@@ -128,7 +128,7 @@ O2NCP.mean <- function(dat, asVolume = F, kw_method = 'WA13'){
              k = (kw('O2', T0, u0, S0) + kw('O2', T1, u1, S1))/2
              k = k + ((k / 100) * kw_error) # apply kw error
              h = (h0 + h1)/2
-             Prs = ((Pslp0 + Pslp1)/2) / 1000  # surface pressure scaling
+             Prs = ((Pslp0 + Pslp1)/2) / 1013.25  # surface pressure scaling
              B = (bubbleSat('O2', u0) + bubbleSat('O2', u1))/2
              B = B + ((B / 100) * B_error) # apply bubble error
              S = (Csat(T0, S0) + Csat(T1, S1))/2

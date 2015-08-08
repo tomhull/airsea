@@ -1,5 +1,5 @@
 library(airsea)
-context("Schmidt")
+context("schmidt")
 
 test_that("Sch returns expected values", {
               expect_equal(Sch('O2', 10, 35), 876.2457, tolerance = 0.00001)

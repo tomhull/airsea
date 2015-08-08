@@ -10,7 +10,7 @@
 \item{price}{usdollars}
 }}
 \source{
-FIXME Martin made it up
+FIXME Martin
 }
 \usage{
 compounds

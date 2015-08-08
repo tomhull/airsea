@@ -12,7 +12,7 @@ Csat(temp, salinity)
 \item{salinity}{numeric vector of salinity (PSU)}
 }
 \value{
-vector of saturation concentration in micro mol per litre
+vector of saturation concentration in mmol m-3
 }
 \description{
 Calculates oxygen saturation concentration in equilibrium with the atmosphere
