@@ -128,7 +128,7 @@ O2NCP.mean <- function(dat, asVolume = F, kw_method = 'WA13'){
              k = (kw('O2', T0, u0, S0) + kw('O2', T1, u1, S1))/2
              k = k + ((k / 100) * kw_error) # apply kw error
              h = (h0 + h1)/2
-             Prs = ((Pslp0 + Pslp1)/2) / 1013.25  # surface pressure scaling
+             Prs = ((Pslp0 + Pslp1)/2) / 1000  # surface pressure scaling
              B = (bubbleSat('O2', u0) + bubbleSat('O2', u1))/2
              B = B + ((B / 100) * B_error) # apply bubble error
              S = (Csat(T0, S0) + Csat(T1, S1))/2
@@ -151,6 +151,7 @@ O2NCP.mean <- function(dat, asVolume = F, kw_method = 'WA13'){
 
              r = (k / h) + ((1 / h) * dhdt) #  = everything that multiples C (residence time)
              f. = (k/h)*S*(1 + B) * Prs + ((1/h) * dhdt * Cb) # q = everything except J that doesn't multiply C
+             print(paste(r, f., k, h, B, Prs))
 
              J = r * h * ((C1 - C0) / (1 - exp(-r * ti)) + C0) - f. * h
              if(asVolume == T){
