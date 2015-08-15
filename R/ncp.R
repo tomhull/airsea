@@ -1,5 +1,63 @@
 # functions for oxygen based NCP calculations
 
+#' O2 NCP simplified (mean)
+#'
+#' calculate NCP based on O2 observations, using mean values of observations
+#'
+#' @details TODO
+#' @param dat data frame matching the format outlined in XXX
+#' @param asVolume if True NCP is not multipled by average mixed layer depth
+#' @param kw_method character string passed to kw, default is 'WA13'
+#' @return a vector of NCP in mmol per m-3 per supplied time interval, or mmol per m-3 if asVolume is True.
+#' @export
+O2NCP.mean <- function(dat, asVolume = F, kw_method = 'WA13'){
+    # expects single row of LHS style data.frame
+    # works with all factors constant
+    if(!"kw_error" %in% colnames(dat)){kw_error = 0}
+    if(!"B_error" %in% colnames(dat)){B_error = 0}
+    if(!"Csat_error" %in% colnames(dat)){Csat_error = 0}
+        # if entrainment state variables found use them
+    if("entrainment" %in% colnames(dat)){use_entrainment = T}else{use_entrainment = F}
+
+    with(dat, {
+
+             # calculate averages
+             k = (kw('O2', T0, u0, S0) + kw('O2', T1, u1, S1))/2
+             k = k + ((k / 100) * kw_error) # apply kw error
+             h = (h0 + h1)/2
+             Prs = ((Pslp0 + Pslp1)/2) / 1013.25  # surface pressure scaling
+             B = (bubbleSat('O2', u0) + bubbleSat('O2', u1))/2
+             B = B + ((B / 100) * B_error) # apply bubble error
+             S = (Csat(T0, S0) + Csat(T1, S1))/2
+             S = S + ((S / 100) * Csat_error) # apply bubble error
+             if('Cb0' %in% names(dat)){
+                 Cb = (Cb0 + Cb1)/2
+             }
+             else{Cb = 0} # check if bottom o2 available
+             ti = timePeriod
+
+            # are we going to calculate entrainment?
+             if(use_entrainment == T){
+                dhdt = (h1 - h0)/ti # calculate entrainment
+                dhdt[dhdt < 0] = 0
+                dhdt[entrainment == F] = 0
+             }else{
+                 # if not set to 0 for no entrainment
+                 dhdt = 0
+             }
+
+             r = (k / h) + ((1 / h) * dhdt) #  = everything that multiples C (residence time)
+             f. = (k/h)*S*(1 + B) * Prs + ((1/h) * dhdt * Cb) # q = everything except J that doesn't multiply C
+
+             J = r * h * ((C1 - C0) / (1 - exp(-r * ti)) + C0) - f. * h
+             if(asVolume == T){
+                 return((J / h) * ti) # return as mmol m-3 per supplied time
+             }
+             else{
+                 return(J * ti) # return as mmol m-2 per supplied time
+             }
+           })
+}
 
 #' O2 NCP
 #'
@@ -12,7 +70,6 @@
 #' @param kw_method character string passed to kw, default is 'WA13'
 #' @param asVolume if True NCP is not multipled by average mixed layer depth
 #' @return a vector of NCP in mmol per m-3 per supplied time interval, or mmol per m-3 if asVolume is True.
-#' @export
 O2NCP.linear <- function(dat, entrainment = T, kw_method = 'WA13', asVolume = F){
     #subfunctions
     Csat.t <- function(tx){
@@ -103,61 +160,3 @@ O2NCP.linear <- function(dat, entrainment = T, kw_method = 'WA13', asVolume = F)
     return(ncp)
 }
 
-#' O2 NCP simplified (mean)
-#'
-#' calculate NCP based on O2 observations, using mean values of observations
-#'
-#' @details TODO
-#' @param dat data frame matching the format outlined in XXX
-#' @param asVolume if True NCP is not multipled by average mixed layer depth
-#' @param kw_method character string passed to kw, default is 'WA13'
-#' @return a vector of NCP in mmol per m-3 per supplied time interval, or mmol per m-3 if asVolume is True.
-#' @export
-O2NCP.mean <- function(dat, asVolume = F, kw_method = 'WA13'){
-    # expects single row of LHS style data.frame
-    # works with all factors constant
-    if(!"kw_error" %in% colnames(dat)){kw_error = 0}
-    if(!"B_error" %in% colnames(dat)){B_error = 0}
-    if(!"Csat_error" %in% colnames(dat)){Csat_error = 0}
-        # if entrainment state variables found use them
-    if("entrainment" %in% colnames(dat)){use_entrainment = T}else{use_entrainment = F}
-
-    with(dat, {
-
-             # calculate averages
-             k = (kw('O2', T0, u0, S0) + kw('O2', T1, u1, S1))/2
-             k = k + ((k / 100) * kw_error) # apply kw error
-             h = (h0 + h1)/2
-             Prs = ((Pslp0 + Pslp1)/2) / 1013.25  # surface pressure scaling
-             B = (bubbleSat('O2', u0) + bubbleSat('O2', u1))/2
-             B = B + ((B / 100) * B_error) # apply bubble error
-             S = (Csat(T0, S0) + Csat(T1, S1))/2
-             S = S + ((S / 100) * Csat_error) # apply bubble error
-             if('Cb0' %in% names(dat)){
-                 Cb = (Cb0 + Cb1)/2
-             }
-             else{Cb = 0} # check if bottom o2 available
-             ti = timePeriod
-
-            # are we going to calculate entrainment?
-             if(use_entrainment == T){
-                dhdt = (h1 - h0)/ti # calculate entrainment
-                dhdt[dhdt < 0] = 0
-                dhdt[entrainment == F] = 0
-             }else{
-                 # if not set to 0 for no entrainment
-                 dhdt = 0
-             }
-
-             r = (k / h) + ((1 / h) * dhdt) #  = everything that multiples C (residence time)
-             f. = (k/h)*S*(1 + B) * Prs + ((1/h) * dhdt * Cb) # q = everything except J that doesn't multiply C
-
-             J = r * h * ((C1 - C0) / (1 - exp(-r * ti)) + C0) - f. * h
-             if(asVolume == T){
-                 return((J / h) * ti) # return as mmol m-3 per supplied time
-             }
-             else{
-                 return(J * ti) # return as mmol m-2 per supplied time
-             }
-           })
-}
