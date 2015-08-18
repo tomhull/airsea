@@ -4,12 +4,10 @@
 \alias{O2NCP.mean}
 \title{O2 NCP simplified (mean)}
 \usage{
-O2NCP.mean(dat, asVolume = F, kw_method = "WA13")
+O2NCP.mean(dat, kw_method = "WA13")
 }
 \arguments{
-\item{dat}{data frame matching the format outlined in XXX}
-
-\item{asVolume}{if True NCP is not multipled by average mixed layer depth}
+\item{dat}{data frame matching the format outlined in \link[airsea]{transform_data}}
 
 \item{kw_method}{character string passed to kw, default is 'WA13'}
 }

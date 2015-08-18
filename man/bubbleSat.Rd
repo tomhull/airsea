@@ -2,7 +2,7 @@
 % Please edit documentation in R/gas.R
 \name{bubbleSat}
 \alias{bubbleSat}
-\title{Woolf and Thorpe (1991) equilibrium bubble supersaturation}
+\title{Equilibrium bubble supersaturation}
 \usage{
 bubbleSat(compound = "O2", u)
 }
