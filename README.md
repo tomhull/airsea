@@ -4,15 +4,35 @@
 
 * Tools for marine air-sea gas exchange studies.
 * Version 0.1pre
-* 
+
 ### What can the package do? ###
-* Calculate water-side gas transfer velocity ($K_w$) using a range of modern parametisations.
-* Calculate Schmit numbers for any gas
+
+* Calculate water-side gas transfer velocity using a range of modern parametisations.
+* Calculate Schmit numbers for (almost) any gas
+* Calculate bubble supersaturation effects (bubble induced equilibrium concentration)
 * Calculate net community production from in-situ oxygen observations.
+* Calculate various seawater properies, density, viscosity...
+
+### airsea and marelac ###
+
+marelac and airsea have some similar features with differing implementation:
+
+* Schmit number calculation, however marelac assumes 35 salinity, airsea has more gasses.
+* Gas saturation concentration, airsea only includes O2 based on Benson and Krause. marelac uses Weiss for several gases and includes pressure compensation.
+
+#### Gasses in marelac `gas_schmit` but not in airsea ####
+* Helium (He)
+* Sulfur hexafluoride (SF6)
+* Trichlorofluoromethane (CCl3F)
+* Dichlorodifluoromethane (CCl2f2)
+
+### TODO ###
+* ?use marelac solubility
+* implement liang2013 bubble and kw
 
 ### Installation ###
 
-```{r install_airsea}
+```r
 library(devtools)
 install_github("tomhull/airsea")
 ```
