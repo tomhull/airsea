@@ -1,29 +1,23 @@
-# README #
-
-This README would normally document whatever steps are necessary to get your application up and running.
+# The airsea R package #
 
 ### What is this repository for? ###
 
-* Quick summary
-* Version 0.1
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+* Tools for marine air-sea gas exchange studies.
+* Version 0.1pre
+* 
+### What can the package do? ###
+* Calculate water-side gas transfer velocity ($K_w$) using a range of modern parametisations.
+* Calculate Schmit numbers for any gas
+* Calculate net community production from in-situ oxygen observations.
 
-### How do I get set up? ###
+### Installation ###
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+```{r install_airsea}
+library(devtools)
+install_github("tomhull/airsea")
+```
 
-### Contribution guidelines ###
+### References ###
 
-* Writing tests
-* Code review
-* Other guidelines
-
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
+* Core gas transfer work taken from:
+Johnson MT. A numerical scheme to calculate temperature and salinity dependent air-water transfer velocities for any gas. Ocean Sci Discuss. 2010;7: 251–290. doi:10.5194/osd-7-251-2010
