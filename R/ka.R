@@ -54,7 +54,7 @@ ka <- function(compound, T, u, method = 'JO10'){
   }
   
   Johnson2010<-function(compound,u,T){
-    (1e-3+Jeffrey_ka(compound,u,T))
+    (1e-3+Jeffrey2010(compound,u,T))
   }
   
   switch(method,
