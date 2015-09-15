@@ -1,5 +1,3 @@
-# gas transfer velocities
-
 #' water side gas transfer velocity
 #'
 #' Calculates water side gas transfer velocity (kw).
