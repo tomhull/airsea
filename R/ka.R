@@ -49,7 +49,7 @@ ka <- function(compound, T, u, method = 'JO10'){
     Cd<-(1e-4*(6.1+0.63*u))
     Sc<-Sc_air(compound,T)
     ra<-13.3*sqrt(Sc) + (Cd^(-0.5)) - 5 + log(Sc)/(2*von_kar)
-    u_star<-u*sqrt(C_D(u))
+    u_star<-u*sqrt(dragCoef(u))
     u_star/ra
   }
   
