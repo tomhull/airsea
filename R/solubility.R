@@ -33,3 +33,53 @@ Csat <- function(temp, salinity){
 
     return((exp(O2.sat))* 44.6608)     # output in uMol/L
 }
+
+
+#' Gas solubility (Henry's law air-water partioning coefficients)
+#' 
+#'
+#' @param compound 
+#' @param S salinity
+#' @param T temperature in Celcius
+#'
+#' @details Applies polynomial fits to empirical data where available (O2,CO2,N2O etc), or where this data is not available, uses the synthesis of Henry's law contstants and temperature dependencies along with the salinity relationship from Johnson (2010) which in turn uses Rolf Sander's collection of Henry's law constants
+#' @details Where available, gas-specific polynomial fits following the model of Weiss 1970 (equation 4) should be used in preference to the Johnson/Sander scheme. This is partcularly important for long-lived (i.e. close-to equilibrium) gases such as N2, O2, Ar, CO2 and N2O. For shorter lived / far from equilibrium gases the simpler scheme will generally to a good job.
+#' @references Johnson, M. T. A numerical scheme to calculate temperature and salinity dependent air-water transfer velocities for any gas. Ocean Sci. Discuss. 7, 251-290 (2010).
+#' @references Sander, R. Compilation of Henry’s Law constants for inorganic and organic species of potential importance in environmental chemistry (Version 3), http://www.henrys-law.org, 1999.
+#' @references Weiss, R, The solubility of nitrogen, oxygen and argon in water and seawater, Deep Sea Research (17), 721-735, 1970
+#' @return partitioning coefficient in moles/litre/atmosphere
+#' @export
+#'
+#' 
+GasSolubility<-function(compound,T,S){
+  
+  Johnson_Sander_GasSolubility<-function(compound,T,S){
+    KH_Molar_per_atmosphere <- function(compound,T,S){
+      # calculate the Henry's law constant in M/atm from Sander data
+      # applying the salting out factor from Johnson 2010
+      (compounds[compound,"KH"]*exp((compounds[compound,"tVar"])*((1/(T+273.15))-(1/298.15))))/K_H_factor(compound,S)
+    }
+  
+  }
+  
+}
+  
+  
+
+
+
+###############################################################################################
+### Under the hood of the Johnson method ######################################################
+##############################################################################################
+
+## Salting out (or in for very small compounds) factor from empirical parameterisation by Johnson 2010
+Ks<-function(compound){
+  theta = (7.3353282561828962e-04 + (3.3961477466551352e-05*log(KH0(compound))) + (-2.4088830102075734E-06*(log(KH0(compound)))^2) + (1.5711393120941302E-07*(log(KH0(compound)))^3))
+  theta*log(Vb(compound))
+}
+
+K_H_factor <-function(compound,S){
+  #calculate salinity-dependent salting-out scaling factor for KH0 (see manuscript)
+  10^(Ks(compound)*S)
+}
+
