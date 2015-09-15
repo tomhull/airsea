@@ -1,13 +1,20 @@
 # functions for oxygen based NCP calculations
 
-#' O2 NCP simplified (mean)
+#' Net community production (NCP) from O2
 #'
-#' calculate NCP based on O2 observations, using mean values of observations
+#' calculate net community production based on mean O2 observations.
 #'
-#' @details TODO
+#' @details Full explanation of the method and methods are found in Hull et al,
+#'   2015 \link{TODO} Entrainment will only be calculated where an
+#'   \code{entrainment} variable is found in the input data and it's value is
+#'   \code{TRUE}. When being using within a monte-carlo analysis you can include
+#'   bias estimates in the following variables \code{kw_error, B_error,
+#'   Csat_error}. Where these variables are found these parameters will be
+#'   scaled accordingly.
 #' @param dat data frame matching the format outlined in \link[airsea]{transform_data}
 #' @param kw_method character string passed to kw, default is 'WA13'
-#' @return a vector of NCP in mmol per m-3 per supplied time interval, or mmol per m-3 if asVolume is True.
+#' @return a vector of NCP in mmol per m-3 per supplied time interval
+#' @references Hull et al, 2015
 #' @export
 O2NCP.mean <- function(dat, kw_method = 'WA13'){
   # expects single row of LHS style data.frame
@@ -51,104 +58,31 @@ O2NCP.mean <- function(dat, kw_method = 'WA13'){
         })
 }
 
-#' O2 NCP
-#'
-#' calculate NCP based on O2 observations, assumes linear change in observed values between
-#' timesteps
+#' transform data to O2NCP format
 #'
 #' @details TODO
-#' @param dat data frame matching the format outlined in XXX
-#' @param entrainment if True (default) calculate NCP with entrainment, Cb0 and Cb1 must be supplied
-#' @param kw_method character string passed to kw, default is 'WA13'
-#' @param asVolume if True NCP is not multipled by average mixed layer depth
-#' @return a vector of NCP in mmol per m-3 per supplied time interval, or mmol per m-3 if asVolume is True.
-O2NCP.linear <- function(dat, entrainment = T, kw_method = 'WA13', asVolume = F){
-    #subfunctions
-    Csat.t <- function(tx){
-        # calculate oxygen saturation at tx
-             S = Csat(temp(tx), sal(tx))
-             S = S + ((S / 100) * Csat_error) # apply bubble error
-        return(S)
-    }
-    rtx <- function(tx){
-        # returns r at tx (any point between t0 and t1)
-        k = kw('O2', temp(tx), ws(tx), sal(tx), kw_method)
-        k = k + ((k / 100) * kw_error) # apply kw error
-        k / mld(tx) + dhdt
-    }
-    Rt <- function(tx){
-        # vectorised, integrates rtx up to suppled time
-        return(sapply(tx, function(y) integrate(rtx, lower = 0, upper = y)$value))
-    }
-    Q2.f <- function(tx){
-        # exponential of integrated r at supplied time
-        return(exp(Rt(tx)))
-    }
-    Gtx <- function(tx){
-            # kw at tx
-        kwx = kw('O2', temp(tx), ws(tx), sal(tx), method = kw_method)
-        kwx = kwx + ((kwx / 100) * kw_error) # apply kw error
-            # return flux at tx
-        Prs = Pslp(tx) / 1013.25  # surface pressure scaling
-        B = bubbleSat('O2', ws(tx))
-        B = B + ((B / 100) * B_error) # apply bubble error
-        Gx = (kwx / mld(tx)) * Csat.t(tx) * (1 + B ) * Prs + (dhdt * Cb(tx))
-        return(Gx)
-    }
-    Q1.f <- function(tx){
-        return(Gtx(tx) * exp(Rt(tx)))
-    }
-    calc_dhdt <- function(h0, h1, times, entrainment){
-        # calculate rate of change in mixed layer depth over time
-        # returns 0 for negative change
-        dhdt = (h1-h0)/max(times)
-        if(entrainment & dhdt > 0){
-            return(dhdt)
-        }
-        else{
-            return(0)
-        }
-    }
-
-    ncp = vector()
-    for(i in 1:nrow(dat)){
-    # variable interpolators, can't be vectorised
-    ti = dat$timePeriod[i]
-    dhdt = calc_dhdt(dat$h0[i], dat$h1[i], ti, entrainment)
-        mld  = approxfun(c(0, ti), c(dat$h0[i], dat$h1[i]))
-        temp = approxfun(c(0, ti), c(dat$T0[i], dat$T1[i]))
-        sal  = approxfun(c(0, ti), c(dat$S0[i], dat$S1[i]))
-        ws   = approxfun(c(0, ti), c(dat$u0[i], dat$u1[i]))
-        Pslp   = approxfun(c(0, ti), c(dat$Pslp0[i], dat$Pslp1[i]))
-        if("Cb0" %in% colnames(dat)){
-            Cb   = approxfun(c(0, ti), c(dat$Cb0[i], dat$Cb1[i]))
-        }else{
-            Cb   = approxfun(c(0, ti), c(0, 0))
-        }
-            # error vectors
-        if("kw_error" %in% colnames(dat)){
-            kw_error = dat$kw_error[i]
-        }else{ kw_error = 0 }
-        if("B_error" %in% colnames(dat)){
-            B_error = dat$B_error[i]
-        }else{ B_error = 0 }
-        if("Csat_error" %in% colnames(dat)){
-            Csat_error = dat$Csat_error[i]
-        }else{ Csat_error = 0 }
-
-    Q2 = integrate(Q2.f, lower = 0, upper = ti)$value
-    Q1 = integrate(Q1.f, lower = 0, upper = ti)$value
-
-        # calculate NCP (J)
-
-    J = (dat$C1[i] * exp(Rt(ti)) - dat$C0[i] - Q1) / Q2
-    if(asVolume == T){
-        ncp = c(ncp, J * ti) # return as mmol m-3 per supplied time
-        }
-    else{
-        ncp = c(ncp, J * ti * ((dat$h0[i] + dat$h1[i])/2)) # return as mmol m-2 per supplied time
-        }
-    }
-    return(ncp)
+#' expects column headings to match the following format (order does not matter):
+#' dateTime = POSIXct, T = temperature (oC), S = salinity, C = oxygen concentration (mmol m-3), u = wind speed (m s-1),
+#' Pslp = pressure at sea level (mbar), h = mixed layer depth (m).
+#' 
+#' @param x data frame of observations
+#'
+#' @return data frame in correct format for O2NCP
+#' @export
+O2NCP.transform <- function(x){
+    # transforms timeseries data to inital and post variables in wide format, i.e. like a lhs
+    dat = with(x,
+               data.frame(dateTime = dateTime,
+                          T0 = T, S0 = S,
+                          C0 = C, u0 = u,
+                          h0 = h, Pslp0 = Pslp))
+    dat$T1 = dat$T0 + c(diff(dat$T0), 0)
+    dat$S1 = dat$S0 + c(diff(dat$S0), 0)
+    dat$u1 = dat$u0 + c(diff(dat$u0), 0)
+    dat$C1 = dat$C0 + c(diff(dat$C0), 0)
+    dat$h1 = dat$h0 + c(diff(dat$h0), 0)
+    dat$Pslp1 = dat$Pslp0 + c(diff(dat$Pslp0), 0)
+    dat$timePeriod = c(diff(as.numeric(dat$dateTime)), 0)
+    dat$end = dat$timePeriod + dat$dateTime
+    return(dat[-nrow(dat),])
 }
-
