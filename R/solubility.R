@@ -32,6 +32,7 @@ Csat <- function(temp, salinity){
     (C0*salinity^2)
 
     return((exp(O2.sat))* 44.6608)     # output in uMol/L
+    # TODO refer to solubility for non - "O2"
 }
 
 
@@ -61,7 +62,7 @@ GasSolubility<-function(compound,T,S){
     }
   
   }
-  
+  # TODO add marelac data method
 }
   
   

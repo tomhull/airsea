@@ -2,7 +2,7 @@
 % Please edit documentation in R/ncp.R
 \name{O2NCP.mean}
 \alias{O2NCP.mean}
-\title{O2 NCP simplified (mean)}
+\title{Net community production (NCP) from O2}
 \usage{
 O2NCP.mean(dat, kw_method = "WA13")
 }
@@ -12,12 +12,21 @@ O2NCP.mean(dat, kw_method = "WA13")
 \item{kw_method}{character string passed to kw, default is 'WA13'}
 }
 \value{
-a vector of NCP in mmol per m-3 per supplied time interval, or mmol per m-3 if asVolume is True.
+a vector of NCP in mmol per m-3 per supplied time interval
 }
 \description{
-calculate NCP based on O2 observations, using mean values of observations
+calculate net community production based on mean O2 observations.
 }
 \details{
-TODO
+Full explanation of the method and methods are found in Hull et al,
+  2015 \link{TODO} Entrainment will only be calculated where an
+  \code{entrainment} variable is found in the input data and it's value is
+  \code{TRUE}. When being using within a monte-carlo analysis you can include
+  bias estimates in the following variables \code{kw_error, B_error,
+  Csat_error}. Where these variables are found these parameters will be
+  scaled accordingly.
+}
+\references{
+Hull et al, 2015
 }
 
