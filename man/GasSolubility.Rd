@@ -7,7 +7,7 @@
 GasSolubility(compound, T, S)
 }
 \arguments{
-\item{compound}{}
+\item{compound}{e.g. "O2"}
 
 \item{T}{temperature in Celcius}
 
@@ -25,7 +25,7 @@ Applies polynomial fits to empirical data where available (O2,CO2,N2O etc), or w
 \references{
 Johnson, M. T. A numerical scheme to calculate temperature and salinity dependent air-water transfer velocities for any gas. Ocean Sci. Discuss. 7, 251-290 (2010).
 
-Sander, R. Compilation of Henry’s Law constants for inorganic and organic species of potential importance in environmental chemistry (Version 3), http://www.henrys-law.org, 1999.
+Sander, R. Compilation of Henry's Law constants for inorganic and organic species of potential importance in environmental chemistry (Version 3), http://www.henrys-law.org, 1999.
 
 Weiss, R, The solubility of nitrogen, oxygen and argon in water and seawater, Deep Sea Research (17), 721-735, 1970
 }

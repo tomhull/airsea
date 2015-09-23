@@ -5,16 +5,16 @@
 #' calculate net community production based on mean O2 observations.
 #'
 #' @details Full explanation of the method and methods are found in Hull et al,
-#'   2015 \link{TODO} Entrainment will only be calculated where an
+#'   2015 Entrainment will only be calculated where an
 #'   \code{entrainment} variable is found in the input data and it's value is
 #'   \code{TRUE}. When being using within a monte-carlo analysis you can include
 #'   bias estimates in the following variables \code{kw_error, B_error,
 #'   Csat_error}. Where these variables are found these parameters will be
 #'   scaled accordingly.
-#' @param dat data frame matching the format outlined in \link[airsea]{transform_data}
+#' @param dat data frame matching the format outlined in \link[airsea]{O2NCP.transform}
 #' @param kw_method character string passed to kw, default is 'WA13'
 #' @return a vector of NCP in mmol per m-3 per supplied time interval
-#' @references Hull et al, 2015
+#' @references Hull et al, 2015 http://www.biogeosciences-discuss.net/12/15611/2015/bgd-12-15611-2015.html
 #' @export
 O2NCP.mean <- function(dat, kw_method = 'WA13'){
   # expects single row of LHS style data.frame

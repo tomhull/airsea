@@ -7,7 +7,7 @@
 O2NCP.mean(dat, kw_method = "WA13")
 }
 \arguments{
-\item{dat}{data frame matching the format outlined in \link[airsea]{transform_data}}
+\item{dat}{data frame matching the format outlined in \link[airsea]{O2NCP.transform}}
 
 \item{kw_method}{character string passed to kw, default is 'WA13'}
 }
@@ -19,7 +19,7 @@ calculate net community production based on mean O2 observations.
 }
 \details{
 Full explanation of the method and methods are found in Hull et al,
-  2015 \link{TODO} Entrainment will only be calculated where an
+  2015 Entrainment will only be calculated where an
   \code{entrainment} variable is found in the input data and it's value is
   \code{TRUE}. When being using within a monte-carlo analysis you can include
   bias estimates in the following variables \code{kw_error, B_error,
@@ -27,6 +27,6 @@ Full explanation of the method and methods are found in Hull et al,
   scaled accordingly.
 }
 \references{
-Hull et al, 2015
+Hull et al, 2015 http://www.biogeosciences-discuss.net/12/15611/2015/bgd-12-15611-2015.html
 }
 

@@ -37,13 +37,13 @@ kw('O2', 10, 7, 35)  # gas transfer velocity for oxygen at 10oC, 7 m-1 s-1 winds
 \references{
 Johnson, M. T. A numerical scheme to calculate temperature and salinity dependent air-water transfer velocities for any gas. Ocean Sci. Discuss. 7, 251-290 (2010).
 
-Jeffery, C., Robinson, I., and Woolf, D.: Tuning a physically-based model of the air-sea gas transfer velocity, Ocean Modell., 31,28–35, doi:10.1016/j.ocemod.2009.09.001, 2010..
+Jeffery, C., Robinson, I., and Woolf, D.: Tuning a physically-based model of the air-sea gas transfer velocity, Ocean Modell., 31,28-35, doi:10.1016/j.ocemod.2009.09.001, 2010..
 
-Liss, P.: Processes of gas exchange across an air-water interface, Deep Sea Res., 20, 221–238, doi:10.1016/0011-7471(73)90013-2, 1973.
+Liss, P.: Processes of gas exchange across an air-water interface, Deep Sea Res., 20, 221-238, doi:10.1016/0011-7471(73)90013-2, 1973.
 
-Mackay, D. and Yeun, A. T. K.: Mass transfer coefficient correlations for volatilization of organic solutes from water, Environ. Sci. Technol., 17, 211–217, doi:10.1021/es00110a006, 1983
+Mackay, D. and Yeun, A. T. K.: Mass transfer coefficient correlations for volatilization of organic solutes from water, Environ. Sci. Technol., 17, 211-217, doi:10.1021/es00110a006, 1983
 
-Duce, R. A., Liss, P., Merrill, J. T., Atlas, E. L., Buat-Menard, P.,Hicks, B. B., Miller, J. M., Prospero, J. M., Arimoto, R., Church, T. M., Ellis, W., Galloway, J. N., Hansen, L., Kickells, T., Knap, A. H., Reinhardt, K. H., Schneider, B., Soudine, A., Tokos, J. J., Tsunogai, S., Wollast, R., and Zhou, M.: The atmospheric input of trace species to the World ocean, Global Biogeochem. Cy., 5, 193–259, 1991
+Duce, R. A., Liss, P., Merrill, J. T., Atlas, E. L., Buat-Menard, P.,Hicks, B. B., Miller, J. M., Prospero, J. M., Arimoto, R., Church, T. M., Ellis, W., Galloway, J. N., Hansen, L., Kickells, T., Knap, A. H., Reinhardt, K. H., Schneider, B., Soudine, A., Tokos, J. J., Tsunogai, S., Wollast, R., and Zhou, M.: The atmospheric input of trace species to the World ocean, Global Biogeochem. Cy., 5, 193-259, 1991
 }
 \keyword{air}
 \keyword{exchange}
