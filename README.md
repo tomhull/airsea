@@ -39,7 +39,7 @@ install_github("tomhull/airsea")
 
 ### References ###
 
-Hull T, Greenwood N, Kaiser J, Johnson M. Uncertainty and sensitivity in optode-based shelf-sea net community production estimates. Biogeosciences Discuss. Copernicus GmbH; 2015;12: 15611–15654. doi:10.5194/bgd-12-15611-2015
+* Hull T, Greenwood N, Kaiser J, Johnson M. Uncertainty and sensitivity in optode-based shelf-sea net community production estimates. Biogeosciences Discuss. Copernicus GmbH; 2015;12: 15611–15654. doi:10.5194/bgd-12-15611-2015
 
 * Core gas transfer work taken from:
 Johnson MT. A numerical scheme to calculate temperature and salinity dependent air-water transfer velocities for any gas. Ocean Sci Discuss. 2010;7: 251–290. doi:10.5194/osd-7-251-2010
