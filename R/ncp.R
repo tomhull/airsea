@@ -13,10 +13,11 @@
 #'   scaled accordingly.
 #' @param dat data frame matching the format outlined in \link[airsea]{O2NCP.transform}
 #' @param kw_method character string passed to kw, default is 'WA13'
+#' @param bubbleoff
 #' @return a vector of NCP in mmol per m-3 per supplied time interval
 #' @references Hull et al, 2015 http://www.biogeosciences-discuss.net/12/15611/2015/bgd-12-15611-2015.html
 #' @export
-O2NCP.mean <- function(dat, kw_method = 'WA13'){
+O2NCP.mean <- function(dat, kw_method = 'WA13', bubbleoff = F){
   # expects single row of LHS style data.frame
   # works with all factors constant
   if(!"kw_error" %in% colnames(dat)){kw_error = 0}
@@ -51,6 +52,9 @@ O2NCP.mean <- function(dat, kw_method = 'WA13'){
             dhdt = 0
         }
 
+        if(bubbleoff){
+          B = 0
+        }
         r = (k / h) + ((1 / h) * dhdt) #  = everything that multiples C (residence time)
         f. = (k/h)*S*(1 + B) * Prs + ((1/h) * dhdt * Cb) # q = everything except J that doesn't multiply C
         J = r * h * ((C1 - C0) / (1 - exp(-r * ti)) + C0) - f. * h

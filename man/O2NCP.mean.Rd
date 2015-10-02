@@ -4,12 +4,14 @@
 \alias{O2NCP.mean}
 \title{Net community production (NCP) from O2}
 \usage{
-O2NCP.mean(dat, kw_method = "WA13")
+O2NCP.mean(dat, kw_method = "WA13", bubbleoff = F)
 }
 \arguments{
 \item{dat}{data frame matching the format outlined in \link[airsea]{O2NCP.transform}}
 
 \item{kw_method}{character string passed to kw, default is 'WA13'}
+
+\item{bubbleoff}{}
 }
 \value{
 a vector of NCP in mmol per m-3 per supplied time interval
