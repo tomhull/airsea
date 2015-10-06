@@ -41,8 +41,8 @@ O2NCP.mean <- function(dat, kw_method = 'WA13', bubbleoff = F){
         # are we going to calculate entrainment?
         if('Cb0' %in% names(dat)){
          Cb = (Cb0 + Cb1)/2 # check if bottom o2 available
-        }
-        else{Cb = 0}
+        }else{Cb = 0}
+        
         if(use_entrainment == T){
             dhdt = (h1 - h0)/ti # calculate entrainment
             dhdt[dhdt < 0] = 0
@@ -53,7 +53,10 @@ O2NCP.mean <- function(dat, kw_method = 'WA13', bubbleoff = F){
         }
 
         if(bubbleoff){
+          print("bubble off")
           B = 0
+          print("Prs comp off")
+          Prs = 1
         }
         r = (k / h) + ((1 / h) * dhdt) #  = everything that multiples C (residence time)
         f. = (k/h)*S*(1 + B) * Prs + ((1/h) * dhdt * Cb) # q = everything except J that doesn't multiply C
