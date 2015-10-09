@@ -166,13 +166,13 @@ We should also expect net respiration if we maintain under-saturated conditions:
 
 ```{r net_resp_preunder_zerochange}
 
-Cbubble = Csat(10, 35) * (1 + bubbleSat("O2", 7) ) - 100 # start and end with supersturated waters
+Cbubble = Csat(10, 35) * (1 + bubbleSat("O2", 7) ) - 100 # start and end with under-saturated waters
 
 test = data.frame(timePeriod = 10*60, # tiny timestep to neglect the calculation of out-gassing
                    C0 = Cbubble, C1 = Cbubble , # constant bubble correct saturation conditions
                    T0 = 10, T1 = 10, # stable temperature
                    S0 = 35, S1 = 35, # stable salinity
-                   u0 = 7, u1 = 7, # tiny wind speed to further neglect out-gassing
+                   u0 = 7, u1 = 7, # stable wind
                    h0 = 100, h1 = 100, # 100m deep mixed layer
                    Pslp0 = 1013.25, Pslp1 = 1013.25 # standard  sea level pressure
                    )
@@ -183,3 +183,61 @@ print(O2NCP.mean(test, bubbleoff = F)) # expect less than 0
 
 More complex tests, where starting and end conditions change,
 will require some numerical estimation of the true values to feed to the model.
+
+## Simple Brute force looping
+
+Here we will solve the equation using a simple loop and very small time steps.
+We force the equation with a known NCP to calculate a new final oxygen concentration.
+This final concentration is then used by our O2NCP function, we should return our known NCP value.
+
+```{r numerical_calc}
+Cbubble = Csat(10, 35) * (1 + bubbleSat("O2", 7) )
+
+test = data.frame(timePeriod = 60*60*10, # 1 hour timestep
+                   C0 = Cbubble, C1 = NA , # 
+                   T0 = 10, T1 = 10, # stable temperature
+                   S0 = 35, S1 = 35, # stable salinity
+                   u0 = 7, u1 = 7, # tiny wind speed to further neglect out-gassing
+                   h0 = 10, h1 = 10, # 10m deep mixed layer
+                   Pslp0 = 1013.25, Pslp1 = 1013.25 # standard  sea level pressure
+                   )
+loop_test <- function(test, NCP){
+    # set starting conditions
+  len = test$timePeriod # do the calculation at 2Hz
+  C0 = test$C0 # set starting oxygen
+  NCP = NCP / len # adjust NCP to rate per 2Hz
+    # calculate mean values
+  temp = mean(c(test$T0, test$T1))
+  windspd = mean(c(test$u0, test$u1))
+  sal = mean(c(test$S0, test$S1))
+  prs = mean(c(test$Pslp0, test$Pslp1))
+  mld = mean(c(test$h0, test$h1))
+  k = kw("O2", temp, windspd, sal)
+  B = bubbleSat("O2", windspd)
+  
+  Cs = Csat(temp, sal) * (1 + B) # adjust Csat for bubbles
+  
+    # iterate
+  for(i in 1:len){
+      # F = k(C* - C)
+    flux = k * (Cs - C0) * (1) # calculate air-sea flux
+      # dC/h = F + J
+    C0 = C0 + (NCP + flux)/mld # adjust oxygen for fluxs
+  }
+  test$C1 = C0
+  return(test)
+}
+
+test = loop_test(test, 5)
+O2NCP.mean(test)
+
+test = loop_test(test, -5)
+O2NCP.mean(test)
+
+test = loop_test(test, 0)
+O2NCP.mean(test)
+
+test = loop_test(test, 100)
+O2NCP.mean(test)
+
+```
