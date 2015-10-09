@@ -4,7 +4,7 @@ author: "Tom Hull"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Validating O2NCP}
+  %\VignetteIndexEntry{O2NCP_validation}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -191,9 +191,42 @@ We force the equation with a known NCP to calculate a new final oxygen concentra
 This final concentration is then used by our O2NCP function, we should return our known NCP value.
 
 ```{r numerical_calc}
+loop_test <- function(test, NCP){
+    # set starting conditions
+  ti = 10 # time scaling factor
+  len = test$timePeriod * ti # do the calculation at 10Hz
+  C0 = test$C0 # set starting oxygen
+  NCP = NCP / len # adjust NCP to rate per 2Hz
+    # calculate mean values
+  k = (kw('O2', test$T0, test$u0, test$S0) +
+         kw('O2', test$T1, test$u1, test$S1))/2
+  mld = (test$h0 + test$h1)/2
+  Prs = ((test$Pslp0 + test$Pslp1)/2) / 1013.25  # surface pressure scaling
+  B = (bubbleSat('O2', test$u0) + bubbleSat('O2', test$u1))/2
+  Cs = (Csat(test$T0, test$S0) + Csat(test$T1, test$S1))/2
+  
+  Cs = Cs * Prs * (1 + B) # adjust Csat for bubbles and pressure
+  
+    # iterate
+  for(i in 1:len){
+      # F = k(C* - C)
+    flux = k * (Cs - C0) * (1) # calculate air-sea flux
+    flux = flux / ti
+      # dC/h = F + J
+    C0 = C0 + (NCP + flux)/mld # adjust oxygen for fluxs
+  }
+  test$C1 = C0
+  return(test)
+}
+
+```
+
+lets test the model with known NCP forcings at saturation conditions:
+
+```{r loop_tests_ncp}
 Cbubble = Csat(10, 35) * (1 + bubbleSat("O2", 7) )
 
-test = data.frame(timePeriod = 60*60*10, # 1 hour timestep
+test = data.frame(timePeriod = 60*60*1, # 1 hour timestep
                    C0 = Cbubble, C1 = NA , # 
                    T0 = 10, T1 = 10, # stable temperature
                    S0 = 35, S1 = 35, # stable salinity
@@ -201,32 +234,6 @@ test = data.frame(timePeriod = 60*60*10, # 1 hour timestep
                    h0 = 10, h1 = 10, # 10m deep mixed layer
                    Pslp0 = 1013.25, Pslp1 = 1013.25 # standard  sea level pressure
                    )
-loop_test <- function(test, NCP){
-    # set starting conditions
-  len = test$timePeriod # do the calculation at 2Hz
-  C0 = test$C0 # set starting oxygen
-  NCP = NCP / len # adjust NCP to rate per 2Hz
-    # calculate mean values
-  temp = mean(c(test$T0, test$T1))
-  windspd = mean(c(test$u0, test$u1))
-  sal = mean(c(test$S0, test$S1))
-  prs = mean(c(test$Pslp0, test$Pslp1))
-  mld = mean(c(test$h0, test$h1))
-  k = kw("O2", temp, windspd, sal)
-  B = bubbleSat("O2", windspd)
-  
-  Cs = Csat(temp, sal) * (1 + B) # adjust Csat for bubbles
-  
-    # iterate
-  for(i in 1:len){
-      # F = k(C* - C)
-    flux = k * (Cs - C0) * (1) # calculate air-sea flux
-      # dC/h = F + J
-    C0 = C0 + (NCP + flux)/mld # adjust oxygen for fluxs
-  }
-  test$C1 = C0
-  return(test)
-}
 
 test = loop_test(test, 5)
 O2NCP.mean(test)
@@ -238,6 +245,61 @@ test = loop_test(test, 0)
 O2NCP.mean(test)
 
 test = loop_test(test, 100)
+O2NCP.mean(test)
+
+```
+
+Now lets keep NCP stable but change the enviroment:
+
+```{r loop_tests_env}
+Cbubble = Csat(10, 35) * (1 + bubbleSat("O2", 7) )
+
+test = data.frame(timePeriod = 60*60*1, # 1 hour timestep
+                   C0 = Cbubble, C1 = NA , # 
+                   T0 = 10, T1 = 12, # warming temperature
+                   S0 = 35, S1 = 35, # stable salinity
+                   u0 = 7, u1 = 7, # tiny wind speed to further neglect out-gassing
+                   h0 = 10, h1 = 10, # 10m deep mixed layer
+                   Pslp0 = 1013.25, Pslp1 = 1013.25 # standard  sea level pressure
+                   )
+
+test = loop_test(test, 5)
+O2NCP.mean(test)
+
+test = data.frame(timePeriod = 60*60*1, # 1 hour timestep
+                   C0 = Cbubble, C1 = NA , # 
+                   T0 = 10, T1 = 12, # warming temperature
+                   S0 = 35, S1 = 35, # stable salinity
+                   u0 = 7, u1 = 7, # tiny wind speed to further neglect out-gassing
+                   h0 = 10, h1 = 10, # 10m deep mixed layer
+                   Pslp0 = 1013.25, Pslp1 = 1013.25 # standard  sea level pressure
+                   )
+
+test = loop_test(test, 5)
+O2NCP.mean(test)
+
+test = data.frame(timePeriod = 60*60*1, # 1 hour timestep
+                   C0 = Cbubble, C1 = NA , # 
+                   T0 = 12, T1 = 12, # warming temperature
+                   S0 = 35, S1 = 35, # stable salinity
+                   u0 = 7, u1 = 7, # tiny wind speed to further neglect out-gassing
+                   h0 = 10, h1 = 10, # 10m deep mixed layer
+                   Pslp0 = 1013.25, Pslp1 = 1013.25 # standard  sea level pressure
+                   )
+
+test = loop_test(test, 5)
+O2NCP.mean(test)
+
+test = data.frame(timePeriod = 60*60*1, # 1 hour timestep
+                   C0 = Cbubble, C1 = NA , # 
+                   T0 = 15, T1 = 15, # warming temperature
+                   S0 = 35, S1 = 35, # stable salinity
+                   u0 = 7, u1 = 7, # tiny wind speed to further neglect out-gassing
+                   h0 = 10, h1 = 10, # 10m deep mixed layer
+                   Pslp0 = 1013.25, Pslp1 = 1013.25 # standard  sea level pressure
+                   )
+
+test = loop_test(test, 5)
 O2NCP.mean(test)
 
 ```
