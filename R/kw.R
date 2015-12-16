@@ -5,15 +5,16 @@
 #' @details TODO - K_calcs scheme
 #' By default implements the gas transfer velocity parametrisation of Wanninkhov, 2014 (WA14).
 #' Other options are:
-#' Wanninkhov et al, 2009 (WA09),
+#' Wanninkhov et al, 2009 (WA09), ?CO2 only
 #' Nighingale et al, 2000 empirical fit to dual tracer data (NG00).
 #' Wanninkhov, 1992 (WA92).
+#' Liss and Merlivat, 1983 (LM83).
 #' set normalize to schmidt number value e.g. 660 to compare with other kw curves.
 #' @param compound character string of compound of interest
 #' @param T vector of temperature in degrees Centigrade
 #' @param u vector of wind speed in meters per second at 10 meters height
 #' @param S vector of salinity
-#' @param method optional string determining kw parameterisation to use, see XXX for list default is 'WA09' (Wanninkhof et al, 2009)
+#' @param method optional string determining kw parameterisation to use, see details for list default is 'WA14' (Wanninkhof et al, 2009)
 #' @param normalize optional integer Schmitt number, if not = 0 kw values are normalised to specified Schmitt number. Default is 0
 #' @param schmidt_method, see `Sch` documentation for details, Default is 'mean'
 #' @return vector of gas transfer velocity in meters per second
@@ -55,10 +56,19 @@ kw <- function(compound, T, u, S, method = 'WA14', normalize = 0, schmidt_method
             schmidt_number <- Sch(compound, T, S, schmidt_method)
         (0.31*u^2*((schmidt_number/660)^(-0.5)))/(100*3600)
     }
+    lissmer83 <- function (compound, T, u, S, normalize, schmidt_method){
+        #calculate kw transfer velocity in m/s according to Liss and Merlivat, 1983
+    		k600<-ifelse(u<3.6,0.17*u,
+     			ifelse(u<13,(2.85*u)-9.65,(5.9*u)-49.3))
+     	    	if (normalize!=0) schmidt_number<-normalize else
+           schmidt_number <- Sch(compound, T, S, schmidt_method)
+     		ifelse(u<3.6,(k600*((schmidt_number/600)^(-0.66)))/(100*3600),(k600*((schmidt_number/600)^(-0.5)))/(100*3600))
+    }
     switch(method,
            WA09 = Wann09(compound, T, u, S, normalize, schmidt_method),
            WA14 = Wann14(compound, T, u, S, normalize, schmidt_method),
            NG00 = Nightingale00(compound, T, u, S, normalize, schmidt_method),
+           LM83 = lissmer83(compound, T, u, S, normalize, schmidt_method),
            WA92 = Wann92(compound, T, u, S, normalize, schmidt_method)
            )
 }
