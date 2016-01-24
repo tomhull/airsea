@@ -1,4 +1,4 @@
-###       Viscosity and density of water functions
+###       Viscosity and density of water and air functions
 
 #' Mass fractions
 #'
@@ -73,6 +73,30 @@ n_sw <- function(T, S, return_relative_viscosity=FALSE){
 }
 
 
+#' Air viscosity
+#'
+#' Dynamic Viscosity of Air
+#'
+#' @details TODO
+#' @param T vector of temperature in degrees Centigrade
+#' @return viscosity of saturated air TODO N.s/m^2 (Pa.s)
+#' @references Tsiligiris, 2008
+#' @keywords air viscosity
+#' @export
+n_air <- function(T){
+	# dynamic viscosity of saturated air according to Tsiligiris 2008
+	SV_0 = 1.715747771e-5
+	SV_1 = 4.722402075e-8
+	SV_2 = -3.663027156e-10
+	SV_3 = 1.873236686e-12
+	SV_4 = -8.050218737e-14
+	
+	# in N.s/m^2 (Pa.s)
+	u_m = SV_0+(SV_1*T)+(SV_2*T^2)+(SV_3*T^3)+(SV_4*T^4)
+	u_m
+}
+
+
 #' Seawater density
 #'
 #' density of seawater according to Millero and Poisson (1981)
@@ -96,6 +120,27 @@ p_sw <- function(T, S){
 }
 
 
+#' Air density
+#'
+#' density of saturated air according to Tsiligiris (2008) 
+#'
+#' @details TODO
+#' @param T vector of temperature in degrees Centigrade
+#' @return density of saturated air in kg m-3
+#' @keywords air density
+#' @references Tsiligiris (2008) 
+#' @export
+p_air <- function(T){
+	# density of saturated air according to in kg/m^3
+	SD_0 = 1.293393662
+	SD_1 = -5.538444326e-3
+	SD_2 = 3.860201577e-5
+	SD_3 = -5.2536065e-7
+	p = SD_0+(SD_1*T)+(SD_2*T^2)+(SD_3*T^3)
+	return(p)
+}
+
+
 #' Seawater dynamic viscosity
 #'
 #' TODO calculate kinmatic viscosity of seawater in cm/s for Schmidt number calculation
@@ -115,4 +160,38 @@ v_sw <- function(T,S) {
         p = p_sw(T,S)
         #multiply by 10000 to go from m2/s to cm2/s
         10000*n/p
+}
+
+
+#' Air dynamic viscosity
+#'
+#' TODO calculate kinmatic viscosity of seawater in cm/s for Schmidt number calculation
+#'
+#' @details TODO
+#' @param T vector of temperature in degrees Centigrade
+#' @return dynamic viscosity of seawater in cm/s
+#' @keywords air dynamic viscosity
+#' @references TODO
+#' @export
+v_air <- function(T) {
+	#calculate kinmatic viscosity of air in cm2/s for Schmidt number calculation
+    	# dynamic viscosity 
+    	n = n_air(T)
+    	# density 
+    	p = p_air(T)
+    	#multiply by 10000 to go from m2/s to cm2/s
+    	10000*n/p
+}
+
+D_air <- function(compound,T){
+	#calculate diffusivity in air in cm2/sec
+	#M_a is molar weight of air
+	M_a <- 28.97
+	M_b <- compounds[compound,"mw"]
+	M_r <- (M_a + M_b)/(M_a*M_b)
+	#assume 1ATM
+	P <- 1
+	#assume molar volume air is 20.1 cm3/mol
+	V_a <- 20.1	
+	(0.001*((T+273.15)^1.75)*sqrt(M_r))/(P*((V_a^(1/3))+(Vb(compound)^(1/3))))^2
 }
