@@ -1,3 +1,4 @@
+[![DOI](https://zenodo.org/badge/20322/tomhull/airsea.svg)](https://zenodo.org/badge/latestdoi/20322/tomhull/airsea)
 # The airsea R package #
 
 ### What is this repository for? ###
