@@ -13,7 +13,7 @@
 #'   scaled accordingly.
 #' @param dat data frame matching the format outlined in \link[airsea]{O2NCP.transform}
 #' @param kw_method character string passed to kw, default is 'WA13'
-#' @param bubbleoff
+#' @param bubbleoff optional boolian, if true disables use of BubbleSat term
 #' @return a vector of NCP in mmol per m-3 per supplied time interval
 #' @references Hull et al, 2015 http://www.biogeosciences-discuss.net/12/15611/2015/bgd-12-15611-2015.html
 #' @export
