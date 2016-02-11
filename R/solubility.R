@@ -31,8 +31,7 @@ Csat <- function(temp, salinity){
     salinity*(B0+(B1*Ts)+(B2*Ts^2)+(B3*Ts^3))+
     (C0*salinity^2)
 
-    return((exp(O2.sat))* 44.6608)     # output in uMol/L
-    # TODO refer to solubility for non - "O2"
+    return((exp(O2.sat))* 44.6608)     # output in uMol/L from cm3 dm3 (ICES)
 }
 
 
