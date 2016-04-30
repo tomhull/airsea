@@ -1,0 +1,66 @@
+---
+title: "Comparisons of gas transfer and bubble supersaturation parametisations"
+author: "Tom Hull"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+bibliography: airsea.bib
+vignette: >
+  %\VignetteIndexEntry{O2NCP_validation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+The `airsea` package provides various parametrisations for the interactions of gases at the air-sea interface.
+Here we quickly explore the differences between the parametrisations and point the reader to the relevant references.
+
+```{r start, include=F}
+library(airsea)
+library(ggplot2)
+library(reshape2)
+```
+
+# The air-sea gas transfer coefficent ($k_w$)
+
+The gas transfer coefficient $k_w$, also known as the piston velocity describes TODO.
+
+# The bubble supersaturation coefficent ($B$)
+
+`airsea` currently offers the parametrisations of @Woolf1991 and experimentally @Liang2013.
+The @Woolf1991 method is derived from calculated bubble fields, is simple to implement but assumes no solubility dependence.
+The @Liang2013 parametrisations accounts for changes in solubility though salinity and temperature changes.
+
+```{r bubbles_o2, include = F}
+source("../R/liang.R")
+comp_o2 = data.frame(u10 = seq(0.1, 20, length.out = 100))
+comp_o2$liang_5 = gasex_overpressure_L12(comp_o2$u10, 5, "O2")
+comp_o2$liang_10 = gasex_overpressure_L12(comp_o2$u10, 10, "O2")
+comp_o2$liang_20 = gasex_overpressure_L12(comp_o2$u10, 20, "O2")
+comp_o2$woolf= bubbleSat("O2", comp_o2$u10)
+comp_o2$gas = "O2"
+
+# comp_co2 = data.frame(u10 = seq(0.1, 20, length.out = 100))
+# comp_co2$liang_5 = gasex_overpressure_L12(comp_co2$u10, 5, "CO2")
+# comp_co2$liang_10 = gasex_overpressure_L12(comp_co2$u10, 10, "CO2")
+# comp_co2$liang_20 = gasex_overpressure_L12(comp_co2$u10, 20, "CO2")
+# comp_co2$woolf= bubbleSat("CO2", comp_co2$u10)
+# comp_co2$gas = "CO2"
+
+comp = rbind(comp_o2)
+```
+```{r bubbleplot, echo = F, fig.width=6, fig.height=6}
+
+ggplot(comp) +
+  geom_line(aes(u10, woolf, color = "Woolf & Thorpe")) +
+  geom_line(aes(u10, liang_5, color = "Liang et al @ 5 degrees")) +
+  geom_line(aes(u10, liang_10, color = "Liang et al @ 10 degrees")) +
+  geom_line(aes(u10, liang_20, color = "Liang et al @ 20 degrees")) +
+  facet_grid(gas ~ ., scales = "free_y") +
+  labs(x = expression(u10~(m~s^-1)), y = expression(K[w]~(m~s^-1))) +
+  scale_color_discrete(name = "Parametrisation", guide = guide_legend(nrow = 2)) +
+  theme_minimal() + theme(legend.position = "bottom")
+```
+
+For oxygen at every temperature @Woolf1991 always estimates a larger bubble supersaturation.
+
+
+
