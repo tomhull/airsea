@@ -99,7 +99,7 @@ n_air <- function(T){
 
 #' Seawater density
 #'
-#' density of seawater according to Millero and Poisson (1981)
+#' density of seawater at atmospheric pressure according to Millero and Poisson (1981)
 #'
 #' @details TODO
 #' @param T vector of temperature in degrees Centigrade
