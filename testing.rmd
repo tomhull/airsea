@@ -1,0 +1,63 @@
+```{r init}
+require(ggplot2)
+require(cowplot)
+```
+```{r entrainment_improvements}
+test = data.frame(h =  c(rep(15, 5), seq(15, 29, by = 0.5), rep(29, 5)))
+test$timePeriod = 1:nrow(test)
+
+Cprofie = data.frame(h = 1:250, C =  c(rep(300, 16), seq(300, 200, length.out = 12), rep(200, 250-12-16)))
+Cb = approxfun(Cprofile$h, Cprofile$C)
+```
+```{r loop_test}
+  # set starting conditions
+len = test$timePeriod
+
+  # iterate
+C0 = 300 # set starting oxygen
+out = data.frame()
+for(i in 1:length(len)){
+  # E = dh/dt * (Cb(h) - C)
+  if(length(test$h[i-1]) == 0){p = test$h[i]}else{p = test$h[i-1]}
+  h = test$h[i]
+  E = (p - h) * (Cb(h) - C)
+  C = (C0 + (E/h))
+  C0 = C
+  o = data.frame("time" = i, C, C0, E, p, h, "ph" = p - h)
+  out = rbind(out, o)
+}
+out
+p1 = ggplot(out) + geom_line(aes(time, h))
+p2 = ggplot(out) + geom_line(aes(time, E))
+cowplot::plot_grid(p1, p2, align = "hv")
+
+```
+
+```{r solubility}
+require(data.table)
+source("R/liang.R")
+source("R/solubility.R")
+load("R/sysdata.rda")
+
+solub(25, 35, 1)*10^8 # igas1 = O2 mol/(m^3 Pa) (*10^8) conv to mol m-3 bar
+marelac::gas_solubility(S = 35, t = 25, species = "O2") # mmol m-3 bar
+solcomp = data.table(t = seq(0.5, 25, length.out = 100))
+solcomp[, marelac := marelac::gas_solubility(35, t = t, species = "O2")]
+solcomp[, liang := solub(t, 35, 1)*10^8]
+solcomp[, johnson := GasSolubility("O2", t, 35)*9.869^6]
+ggplot( reshape2::melt(solcomp, id.var = 't') ) + geom_line(aes(t, value, color = variable))
+
+
+
+comp = data.frame(u10 = seq(0.5, 20, length.out = 100))
+comp$liang_10 = gasex_overpressure_L12(comp$u10, 10, 'O2')
+comp$liang_15 = gasex_overpressure_L12(comp$u10, 15, 'O2')
+comp$liang_20 = gasex_overpressure_L12(comp$u10, 20, 'O2')
+comp$woolf= bubbleSat('O2', comp$u10)
+ggplot( reshape2::melt(comp, id.var = 'u10') ) + geom_line(aes(u10, value, color = variable))
+```
+
+
+```{r desolve}
+require(deSolve)
+```
