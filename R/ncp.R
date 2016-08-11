@@ -24,7 +24,7 @@ O2NCP.mean <- function(dat, kw_method = 'WA13', bubbleoff = F){
   if(!"B_error" %in% colnames(dat)){B_error = 0}
   if(!"Csat_error" %in% colnames(dat)){Csat_error = 0}
       # if entrainment state variables found use them
-  if("entrainment" %in% colnames(dat)){use_entrainment = T}else{use_entrainment = F}
+  if("entrainment" %in% colnames(dat)){use_entrainment = T; print("entrainment = True")}else{use_entrainment = F}
 
     with(dat, {
         ti = timePeriod
@@ -71,6 +71,7 @@ O2NCP.mean <- function(dat, kw_method = 'WA13', bubbleoff = F){
 #' expects column headings to match the following format (order does not matter):
 #' dateTime = POSIXct, T = temperature (oC), S = salinity, C = oxygen concentration (mmol m-3), u = wind speed (m s-1),
 #' Pslp = pressure at sea level (mbar), h = mixed layer depth (m).
+#' Optionally Cb = bottom oxygen (mmol m-3) if entrainment is to be calculated.
 #' 
 #' @param x data frame of observations
 #'
@@ -87,6 +88,10 @@ O2NCP.transform <- function(x){
     dat$S1 = dat$S0 + c(diff(dat$S0), 0)
     dat$u1 = dat$u0 + c(diff(dat$u0), 0)
     dat$C1 = dat$C0 + c(diff(dat$C0), 0)
+    if("Cb" %in% colnames(x)){
+      dat$Cb0 = x$Cb
+      dat$Cb1 = dat$Cb0 + c(diff(dat$Cb0), 0)
+    }
     dat$h1 = dat$h0 + c(diff(dat$h0), 0)
     dat$Pslp1 = dat$Pslp0 + c(diff(dat$Pslp0), 0)
     dat$timePeriod = c(diff(as.numeric(dat$dateTime)), 0)
