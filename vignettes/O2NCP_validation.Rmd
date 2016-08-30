@@ -55,7 +55,8 @@ test = data.frame(timePeriod = 0.01, # tiny timestep to neglect the calculation 
                    C0 = Csat(10, 35), C1 = Csat(10, 35) + 5, # saturation conditions with 5 mmol m-3 increase
                    T0 = 10, T1 = 10, # stable temperature
                    S0 = 35, S1 = 35, # stable salinity
-                   u0 = 0.01, u1 = 0.01, # tiny wind speed to further neglect out-gassing
+                   # u0 = 0.01, u1 = 0.01, # tiny wind speed to further neglect out-gassing
+                   u0 = 1E-3, u1 = 1E-3, # tiny wind speed to further neglect out-gassing
                    h0 = 1, h1 = 1, # shallow unchanging 1m mld
                    Pslp0 = 1013.25, Pslp1 = 1013.25 # standard  sea level pressure
                    )
@@ -162,6 +163,12 @@ test = data.frame(timePeriod = 10*60, # tiny timestep to neglect the calculation
 print(O2NCP.mean(test, bubbleoff = F)) # expect more than 0
 ```
 
+This should be equivilent to just the gas exchange:
+
+```{r net_production_presuper_zerochange_GE}
+kw("O2", 10, 7, 35) * (Csat(10, 35) - Cbubble)*10*60
+```
+
 We should also expect net respiration if we maintain under-saturated conditions:
 
 ```{r net_resp_preunder_zerochange}
@@ -179,24 +186,66 @@ test = data.frame(timePeriod = 10*60, # tiny timestep to neglect the calculation
 print(O2NCP.mean(test, bubbleoff = F)) # expect less than 0
 ```
 
+## Entrainment
+
+Lets check that we get sensible measurements for a moving mixed layer.
+
+```{r entrainment_concept}
+  # conceptually:
+  # 10 1m-3 bins with concentration at saturation
+v1 = 10
+C1 = Csat(10, 35) * (1 + bubbleSat("O2", 0.1) )
+  # entrain 1m-3 of water with concentration of -10
+v2 = 1
+C2 = C1 - 10
+  # new concentration is total mass ditributed over new volume
+m1 = C1 * v1
+m2 = C2 * v2
+m3 = m1 + m2
+v3 = v1 + v2
+C3 = m3 / v3 # C3
+print(C3)
+
+  # or dC is
+dC = ((v3 - v1) * (C2 - C1))/v3
+  # or dC per time is
+(((v3 - v1) * (C2 - C1))/v3)/time
+(((v3 - v1)/time) * (C2 - C1))/v3
+
+  # final conc
+C1 + ((v3 - v1) * (C2 - C1))/v3
+```
+```{r zero_change_entrainment}
+test = data.frame(timePeriod = 1000,
+                   C0 = Csat(10, 35), C1 = C3 , # as above
+                   Cb0 = 200, Cb1 = 200 , # as above
+                   T0 = 10, T1 = 10, # stable temperature
+                   S0 = 35, S1 = 35, # stable salinity
+                   u0 = 1, u1 = 1, # stable wind (although this won't be a factor)
+                   h0 = 3, h1 = 4, # shallow unchanging 1m mld
+                   Pslp0 = 1015.25, Pslp1 = 1013.25 # standard  sea level pressure (again not used)
+                   )
+print(O2NCP.mean(test, bubbleoff = T)) # expect 0
+```
+
 # Numerical estimated tests
 
 More complex tests, where starting and end conditions change,
 will require some numerical estimation of the true values to feed to the model.
 
-## Simple Brute force looping
+## Simple looping
 
 Here we will solve the equation using a simple loop and very small time steps.
 We force the equation with a known NCP to calculate a new final oxygen concentration.
 This final concentration is then used by our O2NCP function, we should return our known NCP value.
 
 ```{r numerical_calc}
-loop_test <- function(test, NCP){
+loop_test <- function(test, NCP, accuracy = 1){
     # set starting conditions
-  ti = 10 # time scaling factor
-  len = test$timePeriod * ti # do the calculation at 10Hz
+  ti = 10 * accuracy # time scaling factor
+  len = test$timePeriod * ti # do the calculation at scale
   C0 = test$C0 # set starting oxygen
-  NCP = NCP / len # adjust NCP to rate per 2Hz
+  NCP = NCP / len # adjust NCP to rate per scale
     # calculate mean values
   k = (kw('O2', test$T0, test$u0, test$S0) +
          kw('O2', test$T1, test$u1, test$S1))/2
@@ -205,6 +254,13 @@ loop_test <- function(test, NCP){
   B = (bubbleSat('O2', test$u0) + bubbleSat('O2', test$u1))/2
   Cs = (Csat(test$T0, test$S0) + Csat(test$T1, test$S1))/2
   
+  # entrainment
+  if("Cb0" %in% colnames(test)){
+    print("Cb found, entrainment calculated")
+    Cb = (test$Cb0 + test$Cb1)/2
+    dhdt = (test$h1 - test$h0)/len
+    }else{dhdt = 0}
+  
   Cs = Cs * Prs * (1 + B) # adjust Csat for bubbles and pressure
   
     # iterate
@@ -212,8 +268,12 @@ loop_test <- function(test, NCP){
       # F = k(C* - C)
     flux = k * (Cs - C0) * (1) # calculate air-sea flux
     flux = flux / ti
+    if(dhdt > 0){
+      # E = dhdt(Cb - C)
+      E = dhdt * (Cb - C0)
+    }else{ E = 0 }
       # dC/h = F + J
-    C0 = C0 + (NCP + flux)/mld # adjust oxygen for fluxs
+    C0 = C0 + (NCP + flux + E)/mld # adjust oxygen for fluxs
   }
   test$C1 = C0
   return(test)
@@ -300,6 +360,66 @@ test = data.frame(timePeriod = 60*60*1, # 1 hour timestep
                    )
 
 test = loop_test(test, 5)
-O2NCP.mean(test)
+O2NCP.mean(test) # expect 5
 
+```
+```{r loop_tests_entrainment}
+Cbubble = Csat(10, 35) * (1 + bubbleSat("O2", 0.1) )
+
+test = data.frame(timePeriod = 1*60*60, # 1 hour timestep
+                   C0 = Cbubble, C1 = NA , # 
+                   T0 = 10, T1 = 10, # stable temperature
+                   S0 = 35, S1 = 35, # stable salinity
+                   u0 = 0.1, u1 = 0.1, # tiny wind speed to further neglect out-gassing
+                   h0 = 10, h1 = 11, # as example
+                   Cb0 = Cbubble - 10, Cb1 = Cbubble - 10 , # 
+                   Pslp0 = 1013.25, Pslp1 = 1013.25 # standard  sea level pressure
+                   )
+
+test = loop_test(test, 0) # expect C1 to be 281.1138
+O2NCP.mean(test, entrainment = T) # expect 0
+
+test = data.frame(timePeriod = 1*60*60, # 1 hour timestep
+                   C0 = Cbubble, C1 = NA , # 
+                   T0 = 10, T1 = 10, # stable temperature
+                   S0 = 35, S1 = 35, # stable salinity
+                   u0 = 0.1, u1 = 0.1, # tiny wind speed to further neglect out-gassing
+                   h0 = 10, h1 = 9, 
+                   Cb0 = Cbubble - 10, Cb1 = Cbubble - 10 , # 
+                   Pslp0 = 1013.25, Pslp1 = 1013.25 # standard  sea level pressure
+                   )
+
+test = loop_test(test, 0)
+O2NCP.mean(test, entrainment = T) # expect 0
+
+test = data.frame(timePeriod = 1*60*60, # 1 hour timestep
+                   C0 = Cbubble, C1 = NA , # 
+                   T0 = 10, T1 = 10, # stable temperature
+                   S0 = 35, S1 = 35, # stable salinity
+                   u0 = 0.1, u1 = 0.1, # tiny wind speed to further neglect out-gassing
+                   h0 = 10, h1 = 15, 
+                   Cb0 = Cbubble + 10, Cb1 = Cbubble + 10 , # 
+                   Pslp0 = 1013.25, Pslp1 = 1013.25 # standard  sea level pressure
+                   )
+
+test = loop_test(test, 0)
+O2NCP.mean(test, entrainment = T) # expect 0
+```
+
+```{r loop_tests_entrainment_ncp}
+Cbubble = Csat(10, 35) * (1 + bubbleSat("O2", 0.1) )
+
+test = data.frame(timePeriod = 1*60*60, # 1 hour timestep
+                   C0 = Cbubble, C1 = NA , # 
+                   T0 = 10, T1 = 10, # stable temperature
+                   S0 = 35, S1 = 35, # stable salinity
+                   u0 = 0.1, u1 = 0.1, # tiny wind speed to further neglect out-gassing
+                   h0 = 10, h1 = 11, # as example
+                   Cb0 = Cbubble - 10, Cb1 = Cbubble - 10 , # 
+                   Pslp0 = 1013.25, Pslp1 = 1013.25 # standard  sea level pressure
+                   )
+
+test = loop_test(test, 10)
+print(test)
+O2NCP.mean(test, entrainment = T) # expect 0
 ```
