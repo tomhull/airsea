@@ -39,11 +39,9 @@ O2NCP.mean <- function(dat, kw_method = 'WA13', bubbleoff = F, entrainment = F){
         S = S + ((S / 100) * Csat_error) # apply bubble error
 
         # are we going to calculate entrainment?
-        if('Cb0' %in% names(dat)){
-         Cb = (Cb0 + Cb1)/2 # check if bottom o2 available
-        }else{Cb = 0}
-        
         if(entrainment == T){
+            Cb = (Cb0 + Cb1)/2
+            print("calculating entrainment")
             dhdt = (h1 - h0)/ti # calculate entrainment
             dhdt[dhdt < 0] = 0
         }else{
