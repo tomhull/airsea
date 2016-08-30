@@ -17,14 +17,14 @@
 #' @return a vector of NCP in mmol per m-3 per supplied time interval
 #' @references Hull et al, 2015 http://www.biogeosciences-discuss.net/12/15611/2015/bgd-12-15611-2015.html
 #' @export
-O2NCP.mean <- function(dat, kw_method = 'WA13', bubbleoff = F){
+O2NCP.mean <- function(dat, kw_method = 'WA13', bubbleoff = F, entrainment = F){
   # expects single row of LHS style data.frame
   # works with all factors constant
   if(!"kw_error" %in% colnames(dat)){kw_error = 0}
   if(!"B_error" %in% colnames(dat)){B_error = 0}
   if(!"Csat_error" %in% colnames(dat)){Csat_error = 0}
       # if entrainment state variables found use them
-  if("entrainment" %in% colnames(dat)){use_entrainment = T; print("entrainment = True")}else{use_entrainment = F}
+  if(!("Cb0" %in% colnames(dat)) & entrainment == T){entrainment = F; print("Cb not found, no entrainment calculated")}
 
     with(dat, {
         ti = timePeriod
@@ -43,10 +43,9 @@ O2NCP.mean <- function(dat, kw_method = 'WA13', bubbleoff = F){
          Cb = (Cb0 + Cb1)/2 # check if bottom o2 available
         }else{Cb = 0}
         
-        if(use_entrainment == T){
+        if(entrainment == T){
             dhdt = (h1 - h0)/ti # calculate entrainment
             dhdt[dhdt < 0] = 0
-            dhdt[entrainment == F] = 0
         }else{
             # if not set to 0 for no entrainment
             dhdt = 0
@@ -55,7 +54,6 @@ O2NCP.mean <- function(dat, kw_method = 'WA13', bubbleoff = F){
         if(bubbleoff){
           print("bubble off")
           B = 0
-          print("Prs comp off")
           Prs = 1
         }
         r = (k / h) + ((1 / h) * dhdt) #  = everything that multiples C (residence time)
