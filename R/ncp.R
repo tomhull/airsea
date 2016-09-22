@@ -48,6 +48,7 @@ O2NCP.mean <- function(dat, kw_method = 'NG00', bubbles = T, entrainment = F, ou
             dhdt = (h1 - h0)/ti # calculate entrainment
             dhdt[dhdt < 0] = 0
             if(debug){print(paste("calculating entrainment, dhdt=", dhdt, "Cb=", Cb))}
+            dhdt[is.na(Cb)] = 0
             Cb[is.na(Cb)] = 0
         }else{
             # if not set to 0 for no entrainment
@@ -61,8 +62,11 @@ O2NCP.mean <- function(dat, kw_method = 'NG00', bubbles = T, entrainment = F, ou
           Prs = 1
         }
         r = (k / h) + ((1 / h) * dhdt) #  = everything that multiples C
+        if(debug){print(paste("r =", r))}
         Q = (k/h)*S*(1 + B) * Prs + ((1/h) * dhdt * Cb) # Q = everything except J that doesn't multiply C
+        if(debug){print(paste("Q =", Q))}
         J = r * h * ((C1 - C0) / (1 - exp(-r * ti)) + C0) - Q * h
+        if(debug){print(paste("J =", J))}
         if(output_conc == T){
           J = J / h
         }
