@@ -61,6 +61,9 @@ O2NCP.mean <- function(dat, kw_method = 'NG00', bubbles = T, entrainment = F, ou
         r = (k / h) + ((1 / h) * dhdt) #  = everything that multiples C (residence time)
         f. = (k/h)*S*(1 + B) * Prs + ((1/h) * dhdt * Cb) # q = everything except J that doesn't multiply C
         J = r * h * ((C1 - C0) / (1 - exp(-r * ti)) + C0) - f. * h
+        if(output_conc == T){
+          J = J / h
+        }
         return(J * ti) # return as mmol m-2 per supplied time
         })
 }
