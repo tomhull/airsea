@@ -13,11 +13,14 @@
 #'   scaled accordingly.
 #' @param dat data frame matching the format outlined in \link[airsea]{O2NCP.transform}
 #' @param kw_method character string passed to kw, default is 'WA13'
-#' @param bubbleoff
+#' @param bubbles logical value to enable bubble supersaturation param, default is TRUE (on)
+#' @param entrainment logical value to enable entrainment calculation, default is FALSE (off)
+#' @param output_conc logical value to enable expressing NCP as just a biological concentration change rather than a flux.
+#'  (units of mmol m-3), default is FALSE (off)
 #' @return a vector of NCP in mmol per m-3 per supplied time interval
 #' @references Hull et al, 2015 http://www.biogeosciences-discuss.net/12/15611/2015/bgd-12-15611-2015.html
 #' @export
-O2NCP.mean <- function(dat, kw_method = 'WA13', bubbleoff = F, entrainment = F){
+O2NCP.mean <- function(dat, kw_method = 'WA13', bubbles = T, entrainment = F, output_conc = F){
   # expects single row of LHS style data.frame
   # works with all factors constant
   if(!"kw_error" %in% colnames(dat)){kw_error = 0}
@@ -47,10 +50,11 @@ O2NCP.mean <- function(dat, kw_method = 'WA13', bubbleoff = F, entrainment = F){
         }else{
             # if not set to 0 for no entrainment
             dhdt = 0
+            Cb = 0
         }
 
-        if(bubbleoff){
-          print("bubble off")
+        if(bubbles == F){
+          print("bubbles off")
           B = 0
           Prs = 1
         }

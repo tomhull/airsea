@@ -26,8 +26,6 @@ In this vignette we briefly outline the implementation of the method in R and pr
 library(airsea)
 ```
 
-# The Math
-
 # Simple test cases
 
 Here we construct some fairly obvious test cases for the O2NCP function to work on.
@@ -43,38 +41,37 @@ test2 = data.frame(timePeriod = 1000,
                    h0 = 1, h1 = 1, # shallow unchanging 1m mld
                    Pslp0 = 1015.25, Pslp1 = 1013.25 # standard  sea level pressure (again not used)
                    )
-print(O2NCP.mean(test2, bubbleoff = T)) # expect 0
+print(O2NCP.mean(test2, bubbles = F)) # expect 0
 ```
 
 Next lets look at close to instant production at saturation conditions.
-We should expect a value very close, but slightly less than our $dC$.
+We should expect a value very close, but slightly more than our $dC$.
 We won't exactly get our $dC$ due to outgassing of the produced oxygen during the time step.
 
 ```{r instant_production_at_sat}
-test = data.frame(timePeriod = 0.01, # tiny timestep to neglect the calculation of out-gassing
+test = data.frame(timePeriod = 1, # tiny timestep to neglect the calculation of out-gassing
                    C0 = Csat(10, 35), C1 = Csat(10, 35) + 5, # saturation conditions with 5 mmol m-3 increase
                    T0 = 10, T1 = 10, # stable temperature
                    S0 = 35, S1 = 35, # stable salinity
-                   # u0 = 0.01, u1 = 0.01, # tiny wind speed to further neglect out-gassing
-                   u0 = 1E-3, u1 = 1E-3, # tiny wind speed to further neglect out-gassing
-                   h0 = 1, h1 = 1, # shallow unchanging 1m mld
+                   u0 = 0.1, u1 = 0.1, # tiny wind speed to further neglect out-gassing
+                   h0 = 1, h1 = 1, # unchanging 1m mld
                    Pslp0 = 1013.25, Pslp1 = 1013.25 # standard  sea level pressure
                    )
-print(O2NCP.mean(test, bubbleoff = T)) # very close, but slightly less than 5 mmol m^-3^ over time step
+print(O2NCP.mean(test, bubbles = F)) # very close, but slightly more than 5 mmol m^-3^ over time step
 ```
 
 Now lets try negative NCP (net respiration)
 
 ```{r instant_resp_at_sat}
-test = data.frame(timePeriod = 0.01, # tiny time step to neglect the calculation of out-gassing
+test = data.frame(timePeriod = 1, # tiny time step to neglect the calculation of out-gassing
                    C0 = Csat(10, 35), C1 = Csat(10, 35) - 5, # saturation conditions with 5 mmol m-3 decrease
                    T0 = 10, T1 = 10, # stable temperature
                    S0 = 35, S1 = 35, # stable salinity
-                   u0 = 0.01, u1 = 0.01, # tiny wind speed to further neglect out-gassing
+                   u0 = 0.1, u1 = 0.1, # tiny wind speed to further neglect out-gassing
                    h0 = 1, h1 = 1, # shallow unchanging 1m mld
                    Pslp0 = 1013.25, Pslp1 = 1013.25 # standard  sea level pressure
                    )
-print(O2NCP.mean(test, bubbleoff = T)) # very close, but slightly less than -5 mmol m^-3^ over time step
+print(O2NCP.mean(test, bubbles = F)) # very close, but slightly less than -5 mmol m^-3^ over time step
 ```
 
 Next lets turn on the bubbles again and see how they supersaturate the water,
@@ -89,7 +86,7 @@ test = data.frame(timePeriod = 10*60, # 10 minute time step
                    h0 = 1, h1 = 1, # shallow unchanging 1m mld
                    Pslp0 = 1013.25, Pslp1 = 1013.25 # standard  sea level pressure
                    )
-print(O2NCP.mean(test, bubbleoff = F)) # expect a bit less than 0
+print(O2NCP.mean(test)) # expect a bit less than 0
 ```
 
 We can prove that this effect is due to bubbles by adjusting $C1$ to a bubble supersaturated value:
@@ -108,25 +105,25 @@ test = data.frame(timePeriod = 10*60, # tiny timestep to neglect the calculation
                    h0 = 1, h1 = 1, # shallow unchanging 1m mld
                    Pslp0 = 1013.25, Pslp1 = 1013.25 # standard  sea level pressure
                    )
-print(O2NCP.mean(test, bubbleoff = F)) # expect 0
+print(O2NCP.mean(test)) # expect 0
 ```
 
 Now lets check that the output scales correctly with large mixed layer depths.
-We should get a NCP slightly more than our $dC \times h$ as some of the NCP should be out-gassed during the time-step.
+We should get a value of our $dC$ multiplied by our mixed layer depth ($h$).
 
 ```{r net_production_deeper}
 
 Cbubble = Csat(10, 35) * (1 + bubbleSat("O2", 7) )
 
-test = data.frame(timePeriod = 10*60, # tiny timestep to neglect the calculation of out-gassing
+test = data.frame(timePeriod = 1, # tiny timestep to neglect the calculation of out-gassing
                    C0 = Cbubble, C1 = Cbubble + 5 , # bubble correct saturation conditions with 5 mmol m-3 increase
                    T0 = 10, T1 = 10, # stable temperature
                    S0 = 35, S1 = 35, # stable salinity
-                   u0 = 7, u1 = 7, # tiny wind speed to further neglect out-gassing
+                   u0 = 1, u1 = 1, # tiny wind speed to further neglect out-gassing
                    h0 = 100, h1 = 100, # 100m deep mixed layer
                    Pslp0 = 1013.25, Pslp1 = 1013.25 # standard  sea level pressure
                    )
-print(O2NCP.mean(test, bubbleoff = F)) # expect sightly more than 500
+print(O2NCP.mean(test)) # expect 500
 ```
 
 The amount out-gassed should increase if the conditions are further from equilibrium.
@@ -135,15 +132,15 @@ The amount out-gassed should increase if the conditions are further from equilib
 
 Cbubble = Csat(10, 35) * (1 + bubbleSat("O2", 7) ) + 50 # start and end with supersturated waters
 
-test = data.frame(timePeriod = 10*60, # tiny timestep to neglect the calculation of out-gassing
+test = data.frame(timePeriod = 10*60, # 10 minute timestep
                    C0 = Cbubble, C1 = Cbubble + 5 , # bubble correct saturation conditions with 5 mmol m-3 increase
                    T0 = 10, T1 = 10, # stable temperature
                    S0 = 35, S1 = 35, # stable salinity
-                   u0 = 7, u1 = 7, # tiny wind speed to further neglect out-gassing
+                   u0 = 7, u1 = 7, # average wind speed
                    h0 = 100, h1 = 100, # 100m deep mixed layer
                    Pslp0 = 1013.25, Pslp1 = 1013.25 # standard  sea level pressure
                    )
-print(O2NCP.mean(test, bubbleoff = F)) # expect more than 500
+print(O2NCP.mean(test)) # expect a little more than 500
 ```
 
 Indeed this means we should expect some positive NCP even with 0 change in $dC$ if we maintain supersaturation:
@@ -152,18 +149,18 @@ Indeed this means we should expect some positive NCP even with 0 change in $dC$ 
 
 Cbubble = Csat(10, 35) * (1 + bubbleSat("O2", 7) ) + 100 # start and end with supersturated waters
 
-test = data.frame(timePeriod = 10*60, # tiny timestep to neglect the calculation of out-gassing
+test = data.frame(timePeriod = 10*60, # 10 minute time step
                    C0 = Cbubble, C1 = Cbubble , # constant bubble correct saturation conditions
                    T0 = 10, T1 = 10, # stable temperature
                    S0 = 35, S1 = 35, # stable salinity
-                   u0 = 7, u1 = 7, # tiny wind speed to further neglect out-gassing
+                   u0 = 7, u1 = 7, # average wind speed
                    h0 = 100, h1 = 100, # 100m deep mixed layer
                    Pslp0 = 1013.25, Pslp1 = 1013.25 # standard  sea level pressure
                    )
-print(O2NCP.mean(test, bubbleoff = F)) # expect more than 0
+print(O2NCP.mean(test)) # expect more than 0
 ```
 
-This should be equivilent to just the gas exchange:
+This should be equivilent to just the air-gas exchange:
 
 ```{r net_production_presuper_zerochange_GE}
 kw("O2", 10, 7, 35) * (Csat(10, 35) - Cbubble)*10*60
@@ -183,7 +180,7 @@ test = data.frame(timePeriod = 10*60, # tiny timestep to neglect the calculation
                    h0 = 100, h1 = 100, # 100m deep mixed layer
                    Pslp0 = 1013.25, Pslp1 = 1013.25 # standard  sea level pressure
                    )
-print(O2NCP.mean(test, bubbleoff = F)) # expect less than 0
+print(O2NCP.mean(test)) # expect less than 0
 ```
 
 ## Entrainment
@@ -192,19 +189,21 @@ Lets check that we get sensible measurements for a moving mixed layer.
 
 ```{r entrainment_concept}
   # conceptually:
-  # 10 1m-3 bins with concentration at saturation
+  # 10 m-3 with concentration of 100
 v1 = 10
-C1 = Csat(10, 35) * (1 + bubbleSat("O2", 0.1) )
-  # entrain 1m-3 of water with concentration of -10
+C1 = 100
+  # entrain 1 m-3 of water with concentration of 50
 v2 = 1
-C2 = C1 - 10
-  # new concentration is total mass ditributed over new volume
-m1 = C1 * v1
-m2 = C2 * v2
-m3 = m1 + m2
-v3 = v1 + v2
-C3 = m3 / v3 # C3
+C2 = 50
+  # new concentration is total mass distributed over new volume
+m1 = C1 * v1 # mass in first layer
+m2 = C2 * v2 # mass in second layer
+m3 = m1 + m2 # mass in final layer
+v3 = v1 + v2 # volume of final layer
+C3 = m3 / v3 # concentration in final layer
 print(C3)
+
+time = 1000
 
   # or dC is
 dC = ((v3 - v1) * (C2 - C1))/v3
@@ -213,19 +212,20 @@ dC = ((v3 - v1) * (C2 - C1))/v3
 (((v3 - v1)/time) * (C2 - C1))/v3
 
   # final conc
-C1 + ((v3 - v1) * (C2 - C1))/v3
+C1 + ((v3 - v1) * (C2 - C1))/v3 == C3
 ```
 ```{r zero_change_entrainment}
 test = data.frame(timePeriod = 1000,
-                   C0 = Csat(10, 35), C1 = C3 , # as above
-                   Cb0 = 200, Cb1 = 200 , # as above
+                   C0 = C1, C1 = C3 , # as above
+                   Cb0 = C2, Cb1 = C2 , # as above
                    T0 = 10, T1 = 10, # stable temperature
                    S0 = 35, S1 = 35, # stable salinity
-                   u0 = 1, u1 = 1, # stable wind (although this won't be a factor)
-                   h0 = 3, h1 = 4, # shallow unchanging 1m mld
+                   u0 = 0.1, u1 = 0.1, # stable wind (although this won't be a factor)
+                   h0 = 10, h1 = 11, # as above, 1 meter deeper
                    Pslp0 = 1015.25, Pslp1 = 1013.25 # standard  sea level pressure (again not used)
                    )
-print(O2NCP.mean(test, bubbleoff = T)) # expect 0
+kw("O2", 10, 0.1, 35) * (Csat(10, 35) - (C1 + C2)/2) * time
+print(O2NCP.mean(test, bubbles = T, entrainment = T))
 ```
 
 # Numerical estimated tests
@@ -422,4 +422,41 @@ test = data.frame(timePeriod = 1*60*60, # 1 hour timestep
 test = loop_test(test, 10)
 print(test)
 O2NCP.mean(test, entrainment = T) # expect 0
+```
+
+# Vectorisation
+
+Lets check the function correctly deals with a data frame full of tests, which simulates a real dataset.
+
+```{r vectorisation_check}
+
+Cbubble = Csat(10, 35) * (1 + bubbleSat("O2", 7) )
+
+test = data.frame(timePeriod = 1*60*60, # 1 hour timestep
+                   C0 = Cbubble, C1 = NA , # 
+                   T0 = 10, T1 = 10, # stable temperature
+                   S0 = 35, S1 = 35, # stable salinity
+                   u0 = 7, u1 = 7, # tiny wind speed to further neglect out-gassing
+                   h0 = 10, h1 = 11, # as example
+                   Cb0 = Cbubble - 10, Cb1 = Cbubble - 10 , # 
+                   Pslp0 = 1013.25, Pslp1 = 1013.25 # standard  sea level pressure
+                   )
+test5 = data.frame(timePeriod = 1*60*60, # 1 hour timestep
+                   C0 = Cbubble, C1 = NA , # 
+                   T0 = 10, T1 = 10, # stable temperature
+                   S0 = 35, S1 = 35, # stable salinity
+                   u0 = 7, u1 = 7, # tiny wind speed to further neglect out-gassing
+                   h0 = 10, h1 = 11, # as example
+                   Cb0 = NA, Cb1 = NA, # test NA
+                   Pslp0 = 1013.25, Pslp1 = 1013.25 # standard  sea level pressure
+                   )
+test1 = loop_test(test, 10)
+test2 = loop_test(test, -10)
+test3 = loop_test(test, 5, accuracy = 10)
+test4 = loop_test(test, 19)
+test5 = loop_test(test5, 6)
+
+test = rbind(test1, test2, test3, test4, test5)
+O2NCP.mean(test, entrainment = T) # expect 0
+
 ```
