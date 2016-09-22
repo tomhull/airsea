@@ -4,13 +4,13 @@
 \alias{O2NCP.mean}
 \title{Net community production (NCP) from O2}
 \usage{
-O2NCP.mean(dat, kw_method = "WA13", bubbles = T, entrainment = F,
+O2NCP.mean(dat, kw_method = "NG00", bubbles = T, entrainment = F,
   output_conc = F)
 }
 \arguments{
 \item{dat}{data frame matching the format outlined in \link[airsea]{O2NCP.transform}}
 
-\item{kw_method}{character string passed to kw, default is 'WA13'}
+\item{kw_method}{character string passed to kw, default is 'NG00'}
 
 \item{bubbles}{logical value to enable bubble supersaturation param, default is TRUE (on)}
 

@@ -12,7 +12,7 @@
 #'   Csat_error}. Where these variables are found these parameters will be
 #'   scaled accordingly.
 #' @param dat data frame matching the format outlined in \link[airsea]{O2NCP.transform}
-#' @param kw_method character string passed to kw, default is 'WA13'
+#' @param kw_method character string passed to kw, default is 'NG00'
 #' @param bubbles logical value to enable bubble supersaturation param, default is TRUE (on)
 #' @param entrainment logical value to enable entrainment calculation, default is FALSE (off)
 #' @param output_conc logical value to enable expressing NCP as just a biological concentration change rather than a flux.
@@ -20,7 +20,7 @@
 #' @return a vector of NCP in mmol per m-3 per supplied time interval
 #' @references Hull et al, 2015 http://www.biogeosciences-discuss.net/12/15611/2015/bgd-12-15611-2015.html
 #' @export
-O2NCP.mean <- function(dat, kw_method = 'WA13', bubbles = T, entrainment = F, output_conc = F){
+O2NCP.mean <- function(dat, kw_method = 'NG00', bubbles = T, entrainment = F, output_conc = F){
   # expects single row of LHS style data.frame
   # works with all factors constant
   if(!"kw_error" %in% colnames(dat)){kw_error = 0}
@@ -32,7 +32,7 @@ O2NCP.mean <- function(dat, kw_method = 'WA13', bubbles = T, entrainment = F, ou
     with(dat, {
         ti = timePeriod
         # calculate averages
-        k = (kw('O2', T0, u0, S0) + kw('O2', T1, u1, S1))/2
+        k = (kw('O2', T0, u0, S0, method = kw_method) + kw('O2', T1, u1, S1, method = kw_method))/2
         k = k + ((k / 100) * kw_error) # apply kw error
         h = (h0 + h1)/2
         Prs = ((Pslp0 + Pslp1)/2) / 1013.25  # surface pressure scaling
