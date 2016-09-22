@@ -5,7 +5,7 @@
 \title{Net community production (NCP) from O2}
 \usage{
 O2NCP.mean(dat, kw_method = "NG00", bubbles = T, entrainment = F,
-  output_conc = F)
+  output_conc = F, debug = F)
 }
 \arguments{
 \item{dat}{data frame matching the format outlined in \link[airsea]{O2NCP.transform}}
@@ -16,7 +16,9 @@ O2NCP.mean(dat, kw_method = "NG00", bubbles = T, entrainment = F,
 
 \item{entrainment}{logical value to enable entrainment calculation, default is FALSE (off)}
 
-\item{output_conc}{logical value to enable expressing NCP as just a biological concentration change rather than a flux.
+\item{output_conc}{logical value to enable expressing NCP as just a biological concentration change rather than a flux.}
+
+\item{output_conc}{logical value to print debug messages
 (units of mmol m-3), default is FALSE (off)}
 }
 \value{

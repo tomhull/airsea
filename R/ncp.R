@@ -16,18 +16,19 @@
 #' @param bubbles logical value to enable bubble supersaturation param, default is TRUE (on)
 #' @param entrainment logical value to enable entrainment calculation, default is FALSE (off)
 #' @param output_conc logical value to enable expressing NCP as just a biological concentration change rather than a flux.
+#' @param output_conc logical value to print debug messages
 #'  (units of mmol m-3), default is FALSE (off)
 #' @return a vector of NCP in mmol per m-3 per supplied time interval
 #' @references Hull et al, 2015 http://www.biogeosciences-discuss.net/12/15611/2015/bgd-12-15611-2015.html
 #' @export
-O2NCP.mean <- function(dat, kw_method = 'NG00', bubbles = T, entrainment = F, output_conc = F){
+O2NCP.mean <- function(dat, kw_method = 'NG00', bubbles = T, entrainment = F, output_conc = F, debug = F){
   # expects single row of LHS style data.frame
   # works with all factors constant
   if(!"kw_error" %in% colnames(dat)){kw_error = 0}
   if(!"B_error" %in% colnames(dat)){B_error = 0}
   if(!"Csat_error" %in% colnames(dat)){Csat_error = 0}
       # if entrainment state variables found use them
-  if(!("Cb0" %in% colnames(dat)) & entrainment == T){entrainment = F; print("Cb not found, no entrainment calculated")}
+  if(!("Cb0" %in% colnames(dat)) & entrainment == T){entrainment = F; if(debug){print("Cb not found, no entrainment calculated")}}
 
     with(dat, {
         ti = timePeriod
@@ -44,9 +45,10 @@ O2NCP.mean <- function(dat, kw_method = 'NG00', bubbles = T, entrainment = F, ou
         # are we going to calculate entrainment?
         if(entrainment == T){
             Cb = (Cb0 + Cb1)/2
-            print("calculating entrainment")
             dhdt = (h1 - h0)/ti # calculate entrainment
             dhdt[dhdt < 0] = 0
+            if(debug){print(paste("calculating entrainment, dhdt=", dhdt, "Cb=", Cb))}
+            Cb[is.na(Cb)] = 0
         }else{
             # if not set to 0 for no entrainment
             dhdt = 0
@@ -54,13 +56,13 @@ O2NCP.mean <- function(dat, kw_method = 'NG00', bubbles = T, entrainment = F, ou
         }
 
         if(bubbles == F){
-          print("bubbles off")
+          if(debug){print("bubbles off")}
           B = 0
           Prs = 1
         }
-        r = (k / h) + ((1 / h) * dhdt) #  = everything that multiples C (residence time)
-        f. = (k/h)*S*(1 + B) * Prs + ((1/h) * dhdt * Cb) # q = everything except J that doesn't multiply C
-        J = r * h * ((C1 - C0) / (1 - exp(-r * ti)) + C0) - f. * h
+        r = (k / h) + ((1 / h) * dhdt) #  = everything that multiples C
+        Q = (k/h)*S*(1 + B) * Prs + ((1/h) * dhdt * Cb) # Q = everything except J that doesn't multiply C
+        J = r * h * ((C1 - C0) / (1 - exp(-r * ti)) + C0) - Q * h
         if(output_conc == T){
           J = J / h
         }
