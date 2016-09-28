@@ -81,6 +81,7 @@ O2NCP.mean <- function(dat, kw_method = 'NG00', bubbles = T, entrainment = F, ou
 #' dateTime = POSIXct, T = temperature (oC), S = salinity, C = oxygen concentration (mmol m-3), u = wind speed (m s-1),
 #' Pslp = pressure at sea level (mbar), h = mixed layer depth (m).
 #' Optionally Cb = bottom oxygen (mmol m-3) if entrainment is to be calculated.
+#' Optionally hmin for minimum mld for uncertainty analysis
 #' 
 #' @param x data frame of observations
 #'
@@ -100,6 +101,10 @@ O2NCP.transform <- function(x){
     if("Cb" %in% colnames(x)){
       dat$Cb0 = x$Cb
       dat$Cb1 = dat$Cb0 + c(diff(dat$Cb0), 0)
+    }
+    if("hmin" %in% colnames(x)){
+      dat$hmin0 = x$hmin
+      dat$hmin1 = dat$hmin0 + c(diff(dat$hmin0), 0)
     }
     dat$h1 = dat$h0 + c(diff(dat$h0), 0)
     dat$Pslp1 = dat$Pslp0 + c(diff(dat$Pslp0), 0)
