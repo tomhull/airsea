@@ -20,19 +20,19 @@ solub <- function(T, S, igas){
   t = (T + 273.15) * 0.01 # t = kelvin/100
   
   # Oxygen
-  if(igas == 1){
+  if(igas == "O2"){
       # soly coefs taken from table.2 Weiss (volumetric solubilty constants)
     soly = -173.4292 + 249.6339 / t + 143.3483 * log(t) - 21.8492 * t + S * (-0.033096 + 0.014259 * t -0.0017 * t^2)
     return( exp(soly) / (22.4*101325*0.20946) ) # 22.4 * mean sea level pressure (Pa) * air mole fraction
   }
   # Ar
-  if(igas == 4){
+  if(igas == "Ar"){
       # soly coefs taken from table.2 Weiss (volumetric solubilty constants)
     soly = -173.5146 + 245.4510 / t + 141.8222 * log(t) - 21.8020 * t + S * (-0.034474 + 0.014934 * t -0.0017729 * t^2);
     return( exp(soly) / (22.4*101325*0.00934) )
   }
   # CO2
-  if(igas==3){
+  if(igas == "CO2"){
     soly = -160.7333 + 215.4152 / t + 89.8920 * log(t) - 1.47759 * t^2 + S * (0.029941 -0.027455 * t + 0.0053407 *t^2)
     return( exp(soly) * 1e3 / 101325 )
   }
@@ -40,7 +40,7 @@ solub <- function(T, S, igas){
   # is this equiv to martin KH when converted to SI
 }
 
-solubility <- function(x, gasname){
+solubility <- function(x, gasname, S = 35){
   # cites wannikhoff 1992
   # x = water temp in oC
   # sol = solubility in mole/m-3/atm
@@ -55,34 +55,44 @@ solubility <- function(x, gasname){
     a = c(-60.2409, 93.4157, 23.3585)
     b = c(0.023517, -0.023656, 0.0047036)
     a0 = c(2073.1, 125.62, 3.6276, 0.043219)
-    s = a[1] + a[2] / tsx + a[3] * log(tsx) + 35 * ( b[1] + b[2] * tsx + b[3] * tsx * tsx)
+    s = a[1] + a[2] / tsx + a[3] * log(tsx) + S * ( b[1] + b[2] * tsx + b[3] * tsx * tsx)
     sol = exp(s) * 1000
   }
   if(gasname == 'O2'){
     a = c(-58.3877, 85.8079, 23.8439) # these are the bunsen solubility constants from weiss
     b = c(-0.034892,  0.016241, -0.0020114) # as above
     a0 = c(1953.4, 128.0, 3.9918, 0.050091)
-    sol = solub(x, 35, 1) * 101325 * 0.20946 # convert to atm and * mole fraction
+    sol = solub(x, S, "O2") * 101325 * 0.20946 # convert to atm and * mole fraction
   }
   if(gasname == 'Ar'){
     a = c(-55.6578, 82.0262, 22.5929) # these are the bunsen solubility constants from weiss
     b = c(-0.036267,  0.078374, -0.0033120) # as above
     a0 = c(1909.1, 125.09, 3.9012, 0.048953)
-    sol = solub(x, 35, 1) * 101325 * 0.00934 # convert to atm and then?
+    sol = solub(x, S, "Ar") * 101325 * 0.00934 # convert to atm and then?
   }
   
   al = sol / 1E5 * r1 * ts # convert Hcp to ?dimensionless
   sc = a0[1] - a0[2] * x + a0[3] * x^2 - a0[4] * x^3
-  return(c(sol, al, sc))
+  return(data.frame(sol, al, sc))
 }
 
+#' Liang et al 2012 Kw param
+#'
+#' @param u10 
+#' @param sst 
+#' @param sal 
+#' @param gasname 
+#'
+#' @return vector of kw in meters per second
+#' @export
+#'
 kw_L12 <- function(u10, sst, sal = 35, gasname){
   
   # print(paste("piston called", gasname, u10, sst, sal))
-  y  = solubility(sst, gasname) # assumes 35 salinity!
+  y  = solubility(sst, gasname, sal) # assumes 35 salinity!
   
-  alc = y[2] # dimentionless henry's law solubility
-  Sc = y[3] # water side schmidtt
+  alc = y$al # dimentionless henry's law solubility
+  Sc = y$sc # water side schmidtt
   # Sc = Sch(gasname, sst, sal)
   
   cd10 = dragCoef(u10) # drag coeficient
@@ -116,17 +126,25 @@ kw_L12 <- function(u10, sst, sal = 35, gasname){
   return(kw) # in 
 }
 
-B_L12 <- function(u10, sst, gasname){
+#' Liang et al 2012 Bubble param
+#'
+#' @param u10 
+#' @param sst 
+#' @param gasname 
+#'
+#' @return bubble sat term (dimensionless)
+#' @export
+B_L12 <- function(u10, sst, gasname, sal){
   
-  k0 = kw_L12(u10, sst, gasname = gasname)
+  k0 = kw_L12(u10, sst, sal, gasname = gasname)
   
   cd10 = dragCoef(u10)
   
   usr = sqrt(cd10) * u10 / sqrt(1000) # 
   
-  y  = solubility(sst, gasname)
-  sol=y[1] # henrys law volumetric solubility from weiss
-  scwc=y[3] # schmidt number
+  y  = solubility(sst, gasname, sal)
+  sol=y$sol # henrys law volumetric solubility from weiss
+  scwc=y$sc # schmidt number
   
   sigmap = 1.5244 * usr^(1.06)
   finj = 5.56 * usr^(3.86)
@@ -140,7 +158,7 @@ B_L12 <- function(u10, sst, gasname){
   if(gasname == 'CO2'){chi=0.00036}
   if(gasname == 'Ar'){chi=0.00934}
   
-  del = kbb * (sigmap + finj * chi / kbb / y[1]) / k0
+  del = kbb * (sigmap + finj * chi / kbb / sol) / k0
   return(del)
 }
 
