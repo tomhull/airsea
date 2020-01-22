@@ -54,15 +54,15 @@ Csat <- function(temp, salinity){
 #' 
 GasSolubility<-function(compound,T, S){
   
-  Johnson_Sander_GasSolubility<-function(compound,T,S){
+  # Johnson_Sander_GasSolubility<-function(compound,T,S)
     KH_Molar_per_atmosphere <- function(compound,T,S){
       # calculate the Henry's law constant in M/atm from Sander data
       # applying the salting out factor from Johnson 2010
       (compounds[compound,"KH"]*exp((compounds[compound,"tVar"])*((1/(T+273.15))-(1/298.15))))/K_H_factor(compound, S)
     }
   
-  }
   # TODO add marelac data method
+  return(KH_Molar_per_atmosphere(compound, T, S))
 }
   
 
