@@ -4,16 +4,16 @@
 \alias{Sch}
 \title{Schmidt number}
 \usage{
-Sch(compound, T, S, method = "mean")
+Sch(compound, TEMP, SAL, method = "JS")
 }
 \arguments{
 \item{compound}{character string}
 
-\item{T}{vector of temperature in degrees Centigrade}
+\item{TEMP}{vector of temperature in degrees Centigrade}
 
-\item{S}{vector of salinity}
+\item{SAL}{vector of salinity}
 
-\item{method}{string matching Schmidt caculation method, default is 'mean'}
+\item{method}{string matching Schmidt calculation method, default is 'WA'}
 }
 \value{
 vector of molar volume at boiling point
@@ -28,4 +28,3 @@ TODO
 TODO
 }
 \keyword{volume}
-

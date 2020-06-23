@@ -4,11 +4,13 @@
 \name{sw_cmf}
 \alias{sw_cmf}
 \title{Mass fractions}
-\format{oA data frame with 53940 rows and 10 variables:
+\format{
+oA data frame with 53940 rows and 10 variables:
 \describe{
 \item{price}{usdollars}
 \item{price}{usdollars}
-}}
+}
+}
 \source{
 FIXME Martin
 }
@@ -19,4 +21,3 @@ sw_cmf
 Mass fractions
 }
 \keyword{datasets}
-

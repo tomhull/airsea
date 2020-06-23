@@ -3,7 +3,6 @@
 \docType{package}
 \name{airsea}
 \alias{airsea}
-\alias{airsea-package}
 \title{airsea.}
 \description{
 package for doing stuff with the sea and the air
@@ -13,4 +12,3 @@ Hull et al (2015)
 
 Johnson, M. T. (2010)
 }
-

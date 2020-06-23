@@ -21,4 +21,3 @@ vector of kw in meters per second
 \description{
 Liang et al 2012 Kw param
 }
-

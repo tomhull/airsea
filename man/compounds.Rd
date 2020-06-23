@@ -4,11 +4,13 @@
 \name{compounds}
 \alias{compounds}
 \title{compounds}
-\format{oA data frame with 53940 rows and 10 variables:
+\format{
+data frame with 53940 rows and 10 variables:
 \describe{
 \item{price}{usdollars}
 \item{price}{usdollars}
-}}
+}
+}
 \source{
 FIXME Martin
 }
@@ -19,4 +21,3 @@ compounds
 compounds for Schmidt number calculations
 }
 \keyword{datasets}
-

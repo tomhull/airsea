@@ -2,18 +2,20 @@
 title: "Comparisons of gas transfer and bubble supersaturation parametrisations"
 author: "Tom Hull"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output:
+  html_document:
+    df_print: paged
+link-citations: yes
 bibliography: airsea.bib
-vignette: >
-  %\VignetteIndexEntry{O2NCP_validation}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+vignette: |
+  %\VignetteIndexEntry{O2NCP_validation} %\VignetteEngine{knitr::rmarkdown} %\VignetteEncoding{UTF-8}
 ---
 
 The `airsea` package provides various parametrisations for the interactions of gases at the air-sea interface.
-Here we quickly explore the differences between the parametrisations and point the reader to the relevant references.
+These are based on the framework outline by @Johnson2010c.
+Here we explore the differences between the parametrisations and point the reader to the relevant references.
 
-```{r start, include=F}
+```{r setup, include=F}
 library(airsea)
 library(ggplot2)
 library(cowplot)
@@ -24,33 +26,63 @@ library(reshape2)
 
 The gas transfer coefficient $k$, also known as the piston velocity, describes the transfer of gas
 across the air-water interface.
-For low solubility gases (i.e. oxygen) transfer is assumed to be mostly controled by the water-side transfer coefficent $k_w$.
-`airsea` provides the bomb C~14~ derived parametrisation of @Wanninkhof1992 (WA92),
-the updated version from @Wanninkhof2014 (WA14), 
-NG00 based on @Nightingale2000 's dual tracer experiment and the FA11 parametrisation used in NOAA-COAREG from @Fairall2011.
+For low solubility gases (i.e. oxygen) transfer is assumed to be mostly controlled by the water-side transfer coefficient $k_w$ (@Beale2013).
+`airsea` provides the bomb C~14~ derived parametrisation of @Wanninkhof1992 (WA92, Eq. \ref{eq:WA92}),
+the updated version from @Wanninkhof2014 (WA14, Eq. \ref{eq:WA14}),
+NG00 (Eq. \ref{eq:NG00}) based on @Nightingale2000 's North Sea dual tracer experiment and the FA11 (Eq. ) parametrisation used in NOAA-COAREG from @Fairall2011.
+
+\begin{equation}
+\label{eq:WA92}
+0.31 \cdot U^2 \cdot (S_c/660)^{-0.5}
+\end{equation}
+
+\begin{equation}
+\label{eq:WA14}
+0.25 \cdot U^2 \cdot (S_c/660)^{-0.5}
+\end{equation}
+
+\begin{equation}
+\label{eq:NG00}
+0.222 \cdot U^2 + 0.333 \cdot U (S_c / 600)^{-0.5}
+\end{equation}
+
+Where $U$ is the wind speed at 10 meters height and $S_c$ is the Schmidt number.
+660 corresponds to the Schmidt number of CO_2_ in seawater at 20$^\circ$C.
+
+These parametrisations by convention provide units of $k_w$ in cm h^-1^ while $U$ is in m s^-1^.
+The `kw` function in `airsea` however provides $k_w$ in m s^-1^.
 
 ```{r kw_comp, include=F}
 out = data.frame()
 paramlist = c("NG00", "WA14", "WA92")
 for(param in paramlist){
   u10 = seq(1, 25, by = 0.5)
-  dat = data.frame(u10, parametrisation = param, K = airsea::kw("O2", 20, u10, 35, method = param))
+  dat = data.frame(u10, parametrisation = param, k = kw("O2", 20, u10, 35, method = param))
   out = rbind(out, dat)
 }
-dat = data.frame(u10, parametrisation = "FA11", K = airsea::kw_L12(u10, 20, 35, gasname = "O2"))
+dat = data.frame(u10, parametrisation = "FA11", k = kw_L12(u10, 20, 35, gasname = "O2"))
+marelac = data.frame(u10, parametrisation="NG00-M", k = marelac::gas_transfer(20, u10, "O2", method = "Nightingale"))
 out = rbind(out, dat)
 ```
 ```{r kw_plot, echo = F, fig.width=6, fig.height=6}
 ggplot(out) +
-  geom_line(aes(u10, K, color = parametrisation), size = 1) +
-  labs(x = expression(u[10]~(m~s^-1)), y = expression(K[w]~(m~s^-1)))
+  geom_line(aes(u10, k, color = parametrisation), size = 1) +
+  labs(x = expression(u[10]~(m~s^-1)), y = expression(k[w]~(m~s^-1))) +
+  theme_minimal() + theme(legend.position = "bottom")
 ```
 
-# The bubble supersaturation coefficent ($B$)
+# Schmidt number
 
-`airsea` currently offers the parametrisations of @Woolf1991 and experimentally @Liang2013.
-The @Woolf1991 method is derived from calculated bubble fields, is simple to implement but assumes no solubility dependence.
-The @Liang2013 parametrisations accounts for changes in solubility though salinity and temperature changes.
+All of these parameteristions are sensitive to the calculation of the Schmidt number.
+`airsea` adopts the method from @Johnson2010c.
+  **Keeling1998 (and thus marelac) uses freshwater measurements with a 1.13 salting out factor**
+  
+# The bubble supersaturation coefficent ($B$) 
+
+`airsea` currently offers the parametrisations of @Woolf1991 (WT91) and experimentally @Liang2013 (LI13).
+Both parametrisations are derived from calculated bubble fields.
+The WT91 method is simple to implement but assumes no solubility dependence.
+The LI13 parametrisations accounts for changes in solubility though salinity and temperature changes.
 
 ```{r bubbles_o2, include = F}
 comp_o2 = data.frame(u10 = seq(0.1, 20, length.out = 100))
@@ -65,12 +97,12 @@ comp = rbind(comp_o2)
 ```{r bubbleplot, echo = F, fig.width=6, fig.height=6}
 
 ggplot(comp) +
-  geom_line(aes(u10, woolf, color = "Woolf & Thorpe"), size = 1) +
-  geom_line(aes(u10, liang_5, color = "Liang et al @ 5 degrees"), size = 1) +
-  geom_line(aes(u10, liang_10, color = "Liang et al @ 10 degrees"), size = 1) +
-  geom_line(aes(u10, liang_20, color = "Liang et al @ 20 degrees"), size = 1) +
+  geom_line(aes(u10, woolf, color = "WT"), size = 1) +
+  geom_line(aes(u10, liang_5, color = "LI13 @ 5 degrees"), size = 1) +
+  geom_line(aes(u10, liang_10, color = "LI13 @ 10 degrees"), size = 1) +
+  geom_line(aes(u10, liang_20, color = "LI13 @ 20 degrees"), size = 1) +
   facet_grid(gas ~ ., scales = "free_y") +
-  labs(x = expression(u10~(m~s^-1)), y = expression(K[w]~(m~s^-1))) +
+  labs(x = expression(u_10~(m~s^-1)), y = expression(B~(dimensionless))) +
   scale_color_discrete(name = "Parametrisation", guide = guide_legend(nrow = 2)) +
   theme_minimal() + theme(legend.position = "bottom")
 ```

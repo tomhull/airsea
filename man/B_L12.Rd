@@ -19,4 +19,3 @@ bubble sat term (dimensionless)
 \description{
 Liang et al 2012 Bubble param
 }
-
