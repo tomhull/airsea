@@ -94,7 +94,7 @@ Csat <- function(temp, salinity, unit = "mmolm", p_atm = 1013.25){
 #'
 #' Calculates oxygen saturation concentration in equilibrium with the atmosphere
 #' as per Garcia & Gordon, 1992, using the combined fit, which is not recommended.
-#' This is however the formulation used on all Aanderaa optodes.
+#' This is however the formulation used on Aanderaa optodes.
 #'
 #' @param temp numeric vector of water temperature in degrees Celsius
 #' @param salinity numeric vector of salinity (PSU)
@@ -102,7 +102,7 @@ Csat <- function(temp, salinity, unit = "mmolm", p_atm = 1013.25){
 #' @return vector of saturation concentration in mmol m-3
 #' @keywords oxygen
 #'
-oxygen.sat.combined <- function(temp, salinity, unit = "mmolm"){
+Csat.combined <- function(temp, salinity, unit = "mmolm"){
   
   if(unit == "umolkg"){
     # umol kg coefficents
