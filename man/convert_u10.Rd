@@ -29,4 +29,3 @@ COARE formulation courtesy of Tom Bell (Personal communication). 2013.
 
 Hsu SA, Meindl EA, Gilhousen DB. Determining the Power-Law Wind-Profile Exponent under Near-Neutral Stability Conditions at Sea. J Appl Meteorol. 1994;33: 757-765
 }
-

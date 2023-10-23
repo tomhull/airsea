@@ -4,16 +4,16 @@
 \alias{Sch}
 \title{Schmidt number}
 \usage{
-Sch(compound, T, S, method = "mean")
+Sch(compound, TEMP, SAL, method = "JS")
 }
 \arguments{
 \item{compound}{character string}
 
-\item{T}{vector of temperature in degrees Centigrade}
+\item{TEMP}{vector of temperature in degrees Celsius}
 
-\item{S}{vector of salinity}
+\item{SAL}{vector of salinity}
 
-\item{method}{string matching Schmidt caculation method, default is 'mean'}
+\item{method}{string matching Schmidt calculation method, default is 'JS'}
 }
 \value{
 vector of molar volume at boiling point
@@ -22,10 +22,16 @@ vector of molar volume at boiling point
 Schmidt number
 }
 \details{
-TODO
+Calculates Schmidt number using one of several methods:
+\itemize{
+ \item JS - Mean of WC and HM as per Johnson, 2000, the default
+ \item WA - Wanningkov, 2014 (assumes salinity = 35)
+ \item HL - Hayduk and Laudie, 1974
+ \item HM - Hayduk and Minhas, 1982
+ \item WC - Wilkie and Chang, 1955
+}
 }
 \references{
 TODO
 }
 \keyword{volume}
-

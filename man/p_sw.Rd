@@ -15,7 +15,7 @@ p_sw(T, S)
 density of seawater in kg m-3
 }
 \description{
-density of seawater according to Millero and Poisson (1981)
+density of seawater at atmospheric pressure according to Millero and Poisson (1981)
 }
 \details{
 TODO
@@ -25,4 +25,3 @@ Millero and Poisson (1981)
 }
 \keyword{density}
 \keyword{seawater}
-

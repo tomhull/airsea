@@ -4,8 +4,7 @@
 \alias{kw}
 \title{water side gas transfer velocity}
 \usage{
-kw(compound, T, u, S, method = "WA14", normalize = 0,
-  schmidt_method = "mean")
+kw(compound, T, u, S, method = "WA14", normalize = 0, schmidt_method = "WA")
 }
 \arguments{
 \item{compound}{character string of compound of interest}
@@ -20,7 +19,7 @@ kw(compound, T, u, S, method = "WA14", normalize = 0,
 
 \item{normalize}{optional integer Schmitt number, if not = 0 kw values are normalised to specified Schmitt number. Default is 0}
 
-\item{schmidt_method, }{see `Sch` documentation for details, Default is 'mean'}
+\item{schmidt_method, }{see `Sch` documentation for details, Default is 'WA'}
 }
 \value{
 vector of gas transfer velocity in meters per second
@@ -57,4 +56,3 @@ Wanninkhof, R. Relationship between wind speed and gas exchange over the ocean. 
 \keyword{kw}
 \keyword{transfer}
 \keyword{velocity}
-

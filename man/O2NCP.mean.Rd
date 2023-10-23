@@ -4,20 +4,34 @@
 \alias{O2NCP.mean}
 \title{Net community production (NCP) from O2}
 \usage{
-O2NCP.mean(dat, kw_method = "WA13", bubbleoff = F)
+O2NCP.mean(
+  dat,
+  kw_method = "NG00",
+  bubbles = T,
+  entrainment = F,
+  output_conc = F,
+  debug = F
+)
 }
 \arguments{
 \item{dat}{data frame matching the format outlined in \link[airsea]{O2NCP.transform}}
 
-\item{kw_method}{character string passed to kw, default is 'WA13'}
+\item{kw_method}{character string passed to kw, default is 'NG00'}
 
-\item{bubbleoff}{optional boolian, if true disables use of BubbleSat term}
+\item{bubbles}{logical value to enable bubble supersaturation param, default is TRUE (on)}
+
+\item{entrainment}{logical value to enable entrainment calculation, default is FALSE (off)}
+
+\item{output_conc}{logical value to enable expressing NCP as just a biological concentration change rather than a flux.}
+
+\item{debug}{logical value to print debug messages
+(units of mmol m-3), default is FALSE (off)}
 }
 \value{
 a vector of NCP in mmol per m-3 per supplied time interval
 }
 \description{
-calculate net community production based on mean O2 observations.
+calculate net community production based on O2 observations.
 }
 \details{
 Full explanation of the method and methods are found in Hull et al,
@@ -31,4 +45,3 @@ Full explanation of the method and methods are found in Hull et al,
 \references{
 Hull et al, 2015 http://www.biogeosciences-discuss.net/12/15611/2015/bgd-12-15611-2015.html
 }
-

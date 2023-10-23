@@ -16,7 +16,7 @@
 #' @param S vector of salinity
 #' @param method optional string determining kw parameterisation to use, see details for list default is 'WA14' (Wanninkhof et al, 2009)
 #' @param normalize optional integer Schmitt number, if not = 0 kw values are normalised to specified Schmitt number. Default is 0
-#' @param schmidt_method, see `Sch` documentation for details, Default is 'mean'
+#' @param schmidt_method, see `Sch` documentation for details, Default is 'JS'
 #' @return vector of gas transfer velocity in meters per second
 #' @keywords kw gas exchange transfer velocity
 #' @references Johnson, M. T. A numerical scheme to calculate temperature and salinity dependent air-water transfer velocities for any gas. Ocean Sci. Discuss. 7, 251-290 (2010).
@@ -28,7 +28,7 @@
 #' kw('O2', 10, 7, 35)  # gas transfer velocity for oxygen at 10oC, 7 m-1 s-1 winds and 35 salinity.
 #' @export
 
-kw <- function(compound, T, u, S, method = 'WA14', normalize = 0, schmidt_method = 'mean'){
+kw <- function(compound, T, u, S, method = 'WA14', normalize = 0, schmidt_method = 'JS'){
     Wann09 <- function(compound, T, u, S, normalize=0, schmidt_method){
         # Kw parametrisation of Wanninkhof2009
         # output in meters per second

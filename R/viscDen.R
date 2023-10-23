@@ -1,13 +1,5 @@
 ###       Viscosity and density of water and air functions
 
-#' Mass fractions of seawater
-#'
-#' Mass fractions of seawater
-#'
-#' @format data frame with 5 rows and 7 variables:
-#' @source FIXME (Martin)
-"sw_cmf"
-
 
 #' Pure water viscosity
 #'
@@ -95,7 +87,7 @@ n_air <- function(T){
 
 #' Seawater density
 #'
-#' density of seawater according to Millero and Poisson (1981)
+#' density of seawater at atmospheric pressure according to Millero and Poisson (1981)
 #'
 #' @details TODO
 #' @param T vector of temperature in degrees Centigrade
