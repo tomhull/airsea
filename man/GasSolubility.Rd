@@ -2,14 +2,14 @@
 % Please edit documentation in R/solubility.R
 \name{GasSolubility}
 \alias{GasSolubility}
-\title{Gas solubility (Henry's law air-water partioning coefficients)}
+\title{Gas solubility (Henry's law air-water partitioning coefficients)}
 \usage{
 GasSolubility(compound, T, S)
 }
 \arguments{
 \item{compound}{e.g. "O2"}
 
-\item{T}{temperature in Celcius}
+\item{T}{temperature in Celsius}
 
 \item{S}{salinity}
 }
@@ -17,12 +17,12 @@ GasSolubility(compound, T, S)
 partitioning coefficient in moles/litre/atmosphere
 }
 \description{
-Gas solubility (Henry's law air-water partioning coefficients)
+Gas solubility (Henry's law air-water partitioning coefficients)
 }
 \details{
-Applies polynomial fits to empirical data where available (O2,CO2,N2O etc), or where this data is not available, uses the synthesis of Henry's law contstants and temperature dependencies along with the salinity relationship from Johnson (2010) which in turn uses Rolf Sander's collection of Henry's law constants
+Applies polynomial fits to empirical data where available (O2,CO2,N2O etc), or where this data is not available, uses the synthesis of Henry's law constants and temperature dependencies along with the salinity relationship from Johnson (2010) which in turn uses Rolf Sander's collection of Henry's law constants
 
-Where available, gas-specific polynomial fits following the model of Weiss 1970 (equation 4) should be used in preference to the Johnson/Sander scheme. This is partcularly important for long-lived (i.e. close-to equilibrium) gases such as N2, O2, Ar, CO2 and N2O. For shorter lived / far from equilibrium gases the simpler scheme will generally to a good job.
+Where available, gas-specific polynomial fits following the model of Weiss 1970 (equation 4) should be used in preference to the Johnson/Sander scheme. This is particularly important for long-lived (i.e. close-to equilibrium) gases such as N2, O2, Ar, CO2 and N2O. For shorter lived / far from equilibrium gases the simpler scheme will generally to a good job.
 }
 \references{
 Johnson, M. T. A numerical scheme to calculate temperature and salinity dependent air-water transfer velocities for any gas. Ocean Sci. Discuss. 7, 251-290 (2010).
@@ -31,4 +31,3 @@ Sander, R. Compilation of Henry's Law constants for inorganic and organic specie
 
 Weiss, R, The solubility of nitrogen, oxygen and argon in water and seawater, Deep Sea Research (17), 721-735, 1970
 }
-
